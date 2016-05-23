@@ -77,7 +77,7 @@ module.exports = function(opts, api, pkg){
   }
 
   function inheritDeps(){
-    funcPackage.dependencies = assign(funcPackage.dependencies, pkg.dependencies)
+    funcPackage.dependencies = assign({}, pkg.dependencies, funcPackage.dependencies)
     return fs.writeJSONAsync(path.join(tmpFuncDir, 'package.json'), funcPackage)
   }
 
