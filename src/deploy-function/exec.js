@@ -37,7 +37,7 @@ module.exports = function(opts, api, pkg){
 
   function copyFunc(){
     if (task) { task.status('Copying Files') }
-    return fs.copyAsync(funcDir, tmpFuncDir, { dereference: true, filter: (path) => path.indexOf('node_modules') < 0 })
+    return fs.copyAsync(funcDir, tmpFuncDir, { dereference: true, filter: (path) => path.indexOf(`${opts.name}/node_modules`) < 0 })
   }
 
   function transpile(){
