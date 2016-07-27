@@ -8,8 +8,11 @@ const loadFuncs = require('../util/load-funcs')
 module.exports = function(opts, api, pkg){
   const funcs = loadFuncs()
 
+  let mapOpts = {}
+  if (opts.concurrency){ mapOpts.concurrency = parseInt(opts.concurrency) }
+
   return Promise.resolve(funcs)
-  .map((name) => deployFunction(assign({ name }, opts), api, pkg) )
+  .map((name) => deployFunction(assign({ name }, opts), api, pkg), mapOpts)
   .map(publish)
   .map(setAlias)
   .map(setPermissions)
