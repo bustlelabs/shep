@@ -1,15 +1,31 @@
-## Shep
+# Shep
 
-A framework for building/deploying applications using AWS API Gateway and Lambda.
+A tool for building and deploying applications with Amazon API Gateway and Lambda.
 
 [![Build Status](https://travis-ci.org/bustlelabs/shep.svg?branch=master)](https://travis-ci.org/bustlelabs/shep) [![npm version](https://badge.fury.io/js/shep.svg)](https://badge.fury.io/js/shep)
 [![Code Climate](https://codeclimate.com/github/bustlelabs/shep/badges/gpa.svg)](https://codeclimate.com/github/bustlelabs/shep)
 
-## Installation
+## Why?
+
+Amazon Web Services [API gateway](https://aws.amazon.com/api-gateway/) and [Lambda](https://aws.amazon.com/lambda/) are great tools for building and deploying ["serverless"](http://cloudacademy.com/blog/aws-lambda-serverless-cloud/) applications. But using them to deploy more than a couple endpoints involves an excessive amount of manual work such as zipping files, uploading via the web UI, configuring paths and function names, etc. Shep is built to automate as many of these tasks as possible, giving you the ability to deploy an entire API and suite of lambda functions with one CLI command.
+
+## Getting Started
+
+### Prerequisites
+
+It will be helpful to have some existing experience with API gateway and Lambda. If you have never used either of these tools before, it is recommended to setup a function manually to see how things are done. Please refer to Amazon's own [getting started guide](http://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started.html)  
+
+### AWS credentials
+
+Shep will require your amazon credentials and will load them using the same methods as the AWS CLI tool. Consult [Amazon's CLI documentation](http://docs.aws.amazon.com/cli/latest/topic/config-vars.html) for instructions.
+
+### Installation
 
 `npm install -g shep`
 
-## Quick start
+### Quick Start
+
+Shep uses a prompt based interface. The simplest API with one function and one endpoint can be created by running the following commands and answering the prompts:
 
 ```
 > shep new
@@ -25,60 +41,7 @@ A framework for building/deploying applications using AWS API Gateway and Lambda
 ... follow prompts ...
 ```
 
-## Why?
-
-AWS Lambda and API Gateway are two great tools for building "serverless" applications. But there are some rough edges. Shep is built to smooth these out. It does this by automating tasks and having a few strong opinions.
-
-### API Gateway
-
-
-#### Mapping templates
-
-API Gateway allows you to write "mapping templates" that transform data before sending it to lambda or other backends. They are written in velocity (java templating) and are generally not fun to deal with. Shep contains a [universal template](https://github.com/bustlelabs/shep/blob/master/src/create-method/templates/mapping.js) that you should use instead. This is automatically configured when you use `shep create-method`. Just use it and save yourself some headache.
-
-### Lambda
-
-#### Packaging
-
-Lambda functions need to be uploaded in a zip file with all of their dependencies already included. Shep will:
-- Install dependencies
-- Transpile ES2015 code
-- Inject environment variables
-
-#### Dependencies
-
-### API Gateway + Lambda
-
-#### Stages/Versioning
-
-### API Gateway Web UI
-
-It is important to note that this does not yet replace the API Gateway UI. For creating new resources/functions/methods you will want to use the shep cli, but edits for headers, params, etc should probably be made through the Web UI. Make sure to update your local api.json file by running `shep pull`
-
-### Lambda versions + API Gateway stages
-
-Shep automatically configures proper permissions and links between API Gateway stages and lambda functions. Example: the beta API stage will call the beta version of your lambda functions. Environment variables are contained in `env.js` and copied into your lambda function on deployment. Just add new keys to that file to created additional environments.
-
-### Node Dependencies
-
-Dependencies can be specified for all project functions in your project root `package.json`. These are copied to each function on deployment and overidden by the dependencies in each functions `package.json` file. Essentially each function 'inherits' any production dependencies from the root project.
-
-## AWS Wishlist
-
-### Swagger export without stage name
-### Install dependencies
-
-## Other projects
-
-[Serverless](https://github.com/serverless/serverless)
-
-Shep and Serverless have similar goals. The creation of Shep was definitely inspired by Serverless. With Shep we strive for a more minimal feature set with more opinions baked in. We encourage you to check out both and select the right one for your project.
-
-[Apex](https://github.com/apex/apex)
-
-Apex is very similar to using Shep with the `--no-api` flag. It is just for managing and deploying lambda functions. It also supports multiple lambda runtimes where Shep only supports nodejs.
-
-## CLI Commands
+## CLI Documentation
 
 `shep new` - Creates a new project. Will create a new API on AWS
 
@@ -97,6 +60,16 @@ Apex is very similar to using Shep with the `--no-api` flag. It is just for mana
 ## Using Without API Gateway
 
 You can use `shep` without API gateway if you just need to deploy and version lambda functions. When creating a project use the following command: `shep new --no-api`. Your project will now skip any API gateway commands and integrations.
+
+## Other Tools
+
+[Serverless](https://github.com/serverless/serverless)
+
+Shep and Serverless have similar goals. The creation of Shep was definitely inspired by Serverless. With Shep we strive for a more minimal feature set with more opinions baked in. We encourage you to check out both and select the right one for your project.
+
+[Apex](https://github.com/apex/apex)
+
+Apex is very similar to using Shep with the `--no-api` flag. It is just for managing and deploying lambda functions. It also supports multiple lambda runtimes where Shep only supports nodejs.
 
 ## Development
 
