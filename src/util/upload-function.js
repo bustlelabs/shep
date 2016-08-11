@@ -39,7 +39,9 @@ export default function(name){
       })
     }
 
-    function update() { return Promise.all([updateCode(), updateConfig()]).get(0) }
+    function update() {
+      return updateCode().tap(updateConfig)
+    }
 
     function updateCode() {
       var params = { ZipFile: zip, FunctionName: lambdaConfig.FunctionName, Publish: true }
