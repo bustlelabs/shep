@@ -23,6 +23,14 @@ Shep will require your amazon credentials and will load them using the same meth
 
 `npm install -g shep@beta`
 
+### Creating a new API
+
+_Coming soon!_
+
+### Using an existing API Gateway project
+
+_Coming soon!_
+
 
 ## CLI Documentation
 
