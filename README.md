@@ -1,13 +1,13 @@
 # Shep
 
-A tool for building and deploying applications with Amazon API Gateway and Lambda.
+A framework for building JavaScript APIs with AWS API Gateway and Lambda
 
-[![Build Status](https://travis-ci.org/bustlelabs/shep.svg?branch=master)](https://travis-ci.org/bustlelabs/shep) [![npm version](https://badge.fury.io/js/shep.svg)](https://badge.fury.io/js/shep)
+[![Build Status](https://travis-ci.org/bustlelabs/shep.svg?branch=master)](https://travis-ci.org/bustlelabs/shep)
 [![Code Climate](https://codeclimate.com/github/bustlelabs/shep/badges/gpa.svg)](https://codeclimate.com/github/bustlelabs/shep)
 
-## Why?
+## Why do you need this?
 
-Amazon Web Services [API gateway](https://aws.amazon.com/api-gateway/) and [Lambda](https://aws.amazon.com/lambda/) are great tools for building and deploying ["serverless"](http://cloudacademy.com/blog/aws-lambda-serverless-cloud/) applications. But using them to deploy more than a couple endpoints involves an excessive amount of manual work such as zipping files, uploading via the web UI, configuring paths and function names, etc. Shep is built to automate as many of these tasks as possible, giving you the ability to deploy an entire API and suite of lambda functions with one CLI command.
+Amazon Web Services [API gateway](https://aws.amazon.com/api-gateway/) and [Lambda](https://aws.amazon.com/lambda/) are great tools for building and deploying ["serverless"](http://cloudacademy.com/blog/aws-lambda-serverless-cloud/) applications. But using them to deploy more than a couple functions/endpoints involves an excessive amount of manual work such as zipping files, uploading via the web UI, configuring paths and function names, etc. Shep is built to automate as many of these tasks as possible, giving you the ability to deploy an entire API and suite of lambda functions with one CLI command.
 
 ## Getting Started
 
@@ -21,25 +21,8 @@ Shep will require your amazon credentials and will load them using the same meth
 
 ### Installation
 
-`npm install -g shep`
+`npm install -g shep@beta`
 
-### Quick Start
-
-Shep uses a prompt based interface. The simplest API with one function and one endpoint can be created by running the following commands and answering the prompts:
-
-```
-> shep new
-... follow prompts ...
-> cd <project-folder>
-> shep create-function
-... follow prompts ...
-> shep create-resource
-... follow prompts ...
-> shep create-method
-... follow prompts ...
-> shep deploy
-... follow prompts ...
-```
 
 ## CLI Documentation
 
@@ -153,15 +136,17 @@ Examples:
   shep build beta *-user       Build functions matching the pattern *-user
 ```
 
+## Why the name 'shep'?
+
+It was called 'shepherd' at first because it was helpful for dealing with *lamb*da but everyone kept shortening it to 'shep' so we changed the name
+
 ## Other Tools
 
 [Serverless](https://github.com/serverless/serverless)
-
-Shep and Serverless have similar goals. The creation of Shep was definitely inspired by Serverless. With Shep we strive for a more minimal feature set with more opinions baked in. We encourage you to check out both and select the right one for your project.
-
 [Apex](https://github.com/apex/apex)
-
-Apex is very similar to using Shep with the `--no-api` flag. It is just for managing and deploying lambda functions. It also supports multiple lambda runtimes where Shep only supports nodejs.
+[Gordon](https://github.com/jorgebastida/gordon)
+[DEEP](https://github.com/MitocGroup/deep-framework)
+[Claudia.js](https://github.com/claudiajs/claudia)
 
 ## Development
 
