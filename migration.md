@@ -27,12 +27,13 @@ example:
 
 
 - Remove all symlinks and instead reference the file directly. Webpack will handle bundling these files for you.
+- Remove `lib` directories for each function
 - Create `function/events` for each function
 - Move `event.json` for each function into `function/events` and name it whatever descriptive thing you like
 - Add `dist/*` to .gitignore
-- Change all files in `config/` from `.json` to `.js`
-- Use config by importing it at the top of your file like: `const config = require('shep-config')`. This is not a real module, but an alias that will be handled by webpack.
-- Run `shep pull`. This will pull down a swagger representation of the latest deployed API for your project. This will now be imported/exported to manage changes with API Gateway.
+- Change all files in `config/` from `.json` to `.js`. Add `module.exports = ` to the beginning of each file
+- Use config by importing it at the top of your file like: `import config from 'shep-config'`. This is not a real module, but an alias that will be handled by webpack.
+- Run `shep pull --api-id foo --stage bar`. You'll need the API gateway ID from AWS and to specify the stage (beta or production). This will pull down a swagger representation of the latest deployed API for your project. This will now be imported/exported to manage changes with API Gateway.
 - Add a webpack.config.js file to the project root.
 
 Example:
