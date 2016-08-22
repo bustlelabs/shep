@@ -13,6 +13,7 @@ export default function(opts){
   const concurrency = opts.concurrency || Infinity
   const env = opts.env
   const region = opts.region
+  const performBuild = opts.build
 
   AWS.config.update({region: region})
 
@@ -23,8 +24,9 @@ export default function(opts){
 
 
   function buildAndUploadFunction(name) {
-    return build(name, env)
-    .then(() => upload(name))
+    return Promise.resolve()
+    .then(() => { if (performBuild === true) return build(name, env) })
+    .then(() => upload(name) )
   }
 
   function pushAndDeployApi(funcs){

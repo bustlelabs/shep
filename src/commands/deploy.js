@@ -13,7 +13,10 @@ export function builder (yargs){
   .describe('concurrency', 'Number of functions to build and upload at one time')
   .default('concurrency', Infinity)
   .alias('concurrency', 'c')
+  .describe('build', 'Build functions before deployment. Use --no-build to skip this step')
+  .default('build', true)
   .example('shep deploy production', 'Deploy all functions with production env variables')
+  .example('shep deploy production --no-build', 'Deploy all functions as currently built in the dist folder')
   .example('shep deploy production create-user', 'Deploy only the create-user function')
   .example('shep deploy production *-user', 'Deploy only functions matching the pattern *-user')
 }
