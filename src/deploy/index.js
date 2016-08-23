@@ -9,6 +9,11 @@ import AWS from 'aws-sdk'
 import { queue, done } from '../util/tasks'
 import fs from 'fs-extra-promise'
 
+const pushApiTask = 'Upload api.json'
+const aliasesTask = 'Promote function aliases'
+const permissionsTask = 'Setup API Gateway <-> Lamda Permissions'
+const deployTask = 'Deploy API'
+
 export default function(opts){
   const functions = loadFuncs(opts.functions)
   const concurrency = opts.concurrency || Infinity
@@ -29,18 +34,23 @@ export default function(opts){
   .each(queue)
   .tap(() => {
     if (api) {
-      queue('Upload api.json')
-      queue('Promote function aliases')
-      queue('Setup API Gateway <-> Lamda Permissions')
-      queue('Deploy API')
+      queue(pushApiTask)
+      queue(aliasesTask)
+      queue(permissionsTask)
+      queue(deployTask)
     } else {
-      queue('Promote function aliases')
+      queue(aliasesTask)
     }
   })
   .map((func) => buildAndUploadFunction(func).tap(() => done(func)), { concurrency })
-  .then((funcs) => api ? pushAndDeployApi(funcs) : Promise.map(funcs, (func) => setAlias(func, env)).tap(() => done('Promote function aliases')) )
+  .then((funcs) => api ? pushAndDeployApi(funcs) : promoteAliases(funcs) )
 
 
+  function promoteAliases(funcs){
+    return Promise.resolve(funcs)
+    .map((func) => setAlias(func, env) )
+    .tap(() => done(aliasesTask))
+  }
   function buildAndUploadFunction(name) {
     return Promise.resolve()
     .then(() => { if (performBuild === true) return build(name, env) })
@@ -49,16 +59,16 @@ export default function(opts){
 
   function pushAndDeployApi(funcs){
     return pushApi(opts)
-    .tap(() => done('Upload api.json'))
+    .tap(() => done(pushApiTask))
     .then((id) => {
       return Promise.resolve(funcs)
       .map((func) => setAlias(func, env))
-      .tap(() => done('Promote function aliases'))
+      .tap(() => done(aliasesTask))
       .map((alias) => setPermission(alias, id) )
-      .tap(() => done('Setup API Gateway <-> Lamda Permissions'))
+      .tap(() => done(permissionsTask))
       .return(id)
     })
     .then((id) => deployApi(id, env))
-    .tap(() => done('Deploy API'))
+    .tap(() => done(deployTask))
   }
 }
