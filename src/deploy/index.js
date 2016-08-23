@@ -2,11 +2,12 @@ import Promise from 'bluebird'
 import loadFuncs from '../util/load-funcs'
 import build from '../util/build-function'
 import upload from '../util/upload-function'
-import lambda from '../util/lambda'
-import { createDeployment } from '../util/api-gateway'
+import { deployApi } from '../util/api-gateway'
+import { setPermission, setAlias } from '../util/lambda'
 import pushApi from '../push'
 import AWS from 'aws-sdk'
-import { queue } from '../util/tasks'
+import { queue, done } from '../util/tasks'
+import fs from 'fs-extra-promise'
 
 export default function(opts){
   const functions = loadFuncs(opts.functions)
@@ -15,12 +16,29 @@ export default function(opts){
   const region = opts.region
   const performBuild = opts.build
 
+  let api
+  try {
+    api = fs.readJSONSync(`api.json`)
+  } catch(e) {
+    console.log('No api.json file found. Skipping API deployment steps')
+  }
+
   AWS.config.update({region: region})
 
   return Promise.resolve(functions)
-  .tap((funcs) => funcs.map(queue))
-  .map(buildAndUploadFunction, { concurrency })
-  .then(pushAndDeployApi)
+  .each(queue)
+  .tap(() => {
+    if (api) {
+      queue('Upload api.json')
+      queue('Promote function aliases')
+      queue('Setup API Gateway <-> Lamda Permissions')
+      queue('Deploy API')
+    } else {
+      queue('Promote function aliases')
+    }
+  })
+  .map((func) => buildAndUploadFunction(func).tap(() => done(func)), { concurrency })
+  .then((funcs) => api ? pushAndDeployApi(funcs) : Promise.map(funcs, (func) => setAlias(func, env)).tap(() => done('Promote function aliases')) )
 
 
   function buildAndUploadFunction(name) {
@@ -31,49 +49,16 @@ export default function(opts){
 
   function pushAndDeployApi(funcs){
     return pushApi(opts)
-    .then(({ result }) => {
+    .tap(() => done('Upload api.json'))
+    .then((id) => {
       return Promise.resolve(funcs)
-      .map(setAlias)
-      .map((alias) => setPermissions(alias, result) )
-      .return(result)
+      .map((func) => setAlias(func, env))
+      .tap(() => done('Promote function aliases'))
+      .map((alias) => setPermission(alias, id) )
+      .tap(() => done('Setup API Gateway <-> Lamda Permissions'))
+      .return(id)
     })
-    .then(deployApi)
-  }
-
-  function setAlias(func){
-    let params = {
-      FunctionName: func.FunctionName,
-      Name: env
-    }
-
-    return lambda.getAlias(params)
-    .then(()=>{
-      params.FunctionVersion = func.Version
-      return lambda.updateAlias(params)
-    })
-    .catch({ code: 'ResourceNotFoundException'}, ()=>{
-      params.FunctionVersion = func.Version
-      return lambda.createAlias(params)
-    })
-  }
-
-  function setPermissions(alias, api){
-    const [, accountId, functionName] = alias.AliasArn.match(new RegExp(`^arn:aws:lambda:${region}:([0-9]+):function:([a-zA-Z0-9-_]+):`))
-
-    let params = {
-      Action: 'lambda:InvokeFunction',
-      Qualifier: alias.Name,
-      FunctionName: functionName,
-      Principal: 'apigateway.amazonaws.com',
-      StatementId: 'api-gateway-access',
-      SourceArn: `arn:aws:execute-api:${region}:${accountId}:${api.id}/*/*/*`
-    }
-
-    return lambda.addPermission(params)
-    .catch((err) => { if (err.code !== 'ResourceConflictException'){ throw err } })
-  }
-
-  function deployApi(api){
-    return createDeployment({restApiId: api.id, stageName: env, variables: {functionAlias: env}})
+    .then((id) => deployApi(id, env))
+    .tap(() => done('Deploy API'))
   }
 }

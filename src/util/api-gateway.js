@@ -1,18 +1,35 @@
 import AWS from 'aws-sdk'
 import Promise from 'bluebird'
+AWS.config.setPromisesDependency(Promise)
 
-const createDeployment = promisify('createDeployment')
-const getExport = promisify('getExport')
-const importRestApi = promisify('importRestApi')
-const putRestApi = promisify('putRestApi')
+export const createDeployment = promisify('createDeployment')
+export const getExport = promisify('getExport')
+export const importRestApi = promisify('importRestApi')
+export const putRestApi = promisify('putRestApi')
 
 function promisify(method){
   return function(params){
-    return Promise.fromCallback((callback)=>{
-      const apiGateway = new AWS.APIGateway()
-      apiGateway[method](params, callback)
-    })
+    const apiGateway = new AWS.APIGateway()
+    return apiGateway[method](params).promise()
   }
 }
 
-export { createDeployment, getExport, importRestApi, putRestApi }
+export function deployApi(id, env){
+  const apiGateway = new AWS.APIGateway()
+  return apiGateway.createDeployment({restApiId: id, stageName: env, variables: { functionAlias: env }}).promise()
+}
+
+export function pushApi(api, id){
+  let params = {
+    body: JSON.stringify(api),
+    failOnWarnings: true
+  }
+
+  if (id){
+    params.mode = 'overwrite'
+    params.restApiId = id
+    return putRestApi(params)
+  } else {
+    return importRestApi(params)
+  }
+}

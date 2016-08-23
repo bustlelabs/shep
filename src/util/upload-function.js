@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
 import { clone } from 'lodash'
-import lambda from '../util/lambda'
+import { getFunction, updateFunctionCode, createFunction, updateFunctionConfiguration } from '../util/lambda'
 import zipDir from '../util/zip-dir'
 import { update } from './tasks'
 import loadLambdaConfig from '../util/load-lambda-config'
@@ -25,11 +25,11 @@ export default function(name){
       params.Code = { ZipFile: zip }
       params.Publish = true
 
-      return lambda.createFunction(params)
+      return createFunction(params)
     }
 
     function get(){
-      return lambda.getFunction({FunctionName: lambdaConfig.FunctionName})
+      return getFunction({FunctionName: lambdaConfig.FunctionName})
       .catch((err)=> {
         if (err.code === 'ResourceNotFoundException'){
           return Promise.resolve()
@@ -45,13 +45,13 @@ export default function(name){
 
     function updateCode() {
       var params = { ZipFile: zip, FunctionName: lambdaConfig.FunctionName, Publish: true }
-      return lambda.updateFunctionCode(params)
+      return updateFunctionCode(params)
     }
 
     function updateConfig() {
       var params = clone(lambdaConfig)
       params.FunctionName = lambdaConfig.FunctionName
-      return lambda.updateFunctionConfiguration(params)
+      return updateFunctionConfiguration(params)
     }
   }
 }

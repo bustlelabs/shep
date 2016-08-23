@@ -21,9 +21,17 @@ export function done(name){
   }
 }
 
-export function update(name, status){
+export function update(name, text){
   if (tasks[name]){
-    tasks[name].status(status)
+    tasks[name].status(text)
+  } else {
+    throw new Error(`No task named ${name} has been started`)
+  }
+}
+
+export function details(name, text){
+  if (tasks[name]){
+    tasks[name].details(text)
   } else {
     throw new Error(`No task named ${name} has been started`)
   }
