@@ -11,8 +11,15 @@ const ui = cliui({ width: 80 })
 
 const results = { success: 'SUCCESS' , error: 'ERROR', exception: 'EXCEPTION' }
 
+const awsNodeVersion = '4.3.2'
+const processVersion = process.versions.node
+
 export default function(opts){
   AWS.config.update({region: opts.region})
+
+  if (processVersion !== awsNodeVersion ){
+    console.log(`Warning: Lambda currently runs node v${awsNodeVersion} but you are using v${processVersion}`)
+  }
 
   const name = opts.name
   const env = opts.environemnt || 'development'
