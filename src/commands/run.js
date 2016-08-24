@@ -11,8 +11,11 @@ export function builder (yargs){
   .describe('environment', 'Environment variables to use')
   .describe('event', 'Event to use')
   .default('environment', 'development')
+  .describe('build', 'Build functions before running. Use --no-build to skip this step')
+  .default('build', true)
   .example('shep run', 'Launch an interactive CLI')
   .example('shep run foo', 'Runs the `foo` function for all events')
+  .example('shep run foo --no-build', 'Run the already built `foo` function in the dist folder')
   .example('shep run foo --event default', 'Runs the `foo` function for just the `default` event')
   .example('shep run foo --environment production', 'Runs the `foo` function with production environment')
 }

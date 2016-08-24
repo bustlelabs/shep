@@ -21,6 +21,7 @@ export default function(opts){
     console.log(`Warning: Lambda currently runs node v${awsNodeVersion} but you are using v${processVersion}`)
   }
 
+  const performBuild = opts.build
   const name = opts.name
   const env = opts.environemnt || 'development'
   const lambdaConfig = loadLambdaConfig(name)
@@ -29,7 +30,8 @@ export default function(opts){
 
   const context = {}
 
-  return build({ functions: name, env: env })
+  return Promise.resolve()
+  .then(() => { if (performBuild === true) return build({ functions: name, env: env }) })
   .then(() => requireProject(`dist/${name}/${fileName}`)[handler] )
   .then((func) => {
     return Promise.map(events, (eventFilename) => {
@@ -58,31 +60,35 @@ export default function(opts){
       })
     })
   })
-  .tap((outputs) => {
-    if(outputs.length === 1){
-      console.log(outputs[0].response)
-    }
-  })
-  .map((output) => {
-      ui.div(
-        {
-          text: output.name,
-          width: 20,
-        },
-        {
-          text: formatResult(output),
-          width: 15
-        },
-        {
-          text: formatDate(output),
-          width: 10
-        },
-        {
-          text: formatResponse(output)
-        }
-      )
-  })
+  .tap(logOutput)
+  .map(formatOutput)
   .then(() => console.log(ui.toString()))
+}
+
+function logOutput(outputs){
+  if(outputs.length === 1){
+    console.log(outputs[0].response)
+  }
+}
+
+function formatOutput(output){
+    ui.div(
+      {
+        text: output.name,
+        width: 20,
+      },
+      {
+        text: formatResult(output),
+        width: 15
+      },
+      {
+        text: formatDate(output),
+        width: 10
+      },
+      {
+        text: formatResponse(output)
+      }
+    )
 }
 
 function formatResponse({ result, response }){
