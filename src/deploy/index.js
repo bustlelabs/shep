@@ -45,7 +45,6 @@ export default function(opts){
   .map((func) => buildAndUploadFunction(func).tap(() => done(func)), { concurrency })
   .then((funcs) => api ? pushAndDeployApi(funcs) : promoteAliases(funcs) )
 
-
   function promoteAliases(funcs){
     return Promise.resolve(funcs)
     .map((func) => setAlias(func, env) )
@@ -61,9 +60,7 @@ export default function(opts){
     return pushApi(opts)
     .tap(() => done(pushApiTask))
     .then((id) => {
-      return Promise.resolve(funcs)
-      .map((func) => setAlias(func, env))
-      .tap(() => done(aliasesTask))
+      return promoteAliases(funcs)
       .map((alias) => setPermission(alias, id) )
       .tap(() => done(permissionsTask))
       .return(id)
