@@ -61,7 +61,7 @@ export default function(opts){
     .tap(() => done(pushApiTask))
     .then((id) => {
       return promoteAliases(funcs)
-      .map((alias) => setPermission(alias, id) )
+      .map((alias) => setPermission(alias, id, env) )
       .tap(() => done(permissionsTask))
       .return(id)
     })

@@ -36,7 +36,7 @@ export function setAlias(func, name){
 }
 
 
-export function setPermission(alias, apiId){
+export function setPermission(alias, apiId, env){
   const arn = alias.AliasArn.split(':')
   const region = arn[3]
   const accountId = arn[4]
@@ -47,8 +47,8 @@ export function setPermission(alias, apiId){
     Qualifier: alias.Name,
     FunctionName: functionName,
     Principal: 'apigateway.amazonaws.com',
-    StatementId: 'api-gateway-access',
-    SourceArn: `arn:aws:execute-api:${region}:${accountId}:${apiId}/*/*/*`
+    StatementId: `api-gateway-access-${apiId}-${env}`,
+    SourceArn: `arn:aws:execute-api:${region}:${accountId}:${apiId}/${env}/*`
   }
 
   return addPermission(params)
