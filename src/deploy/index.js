@@ -61,11 +61,30 @@ export default function(opts){
     .tap(() => done(pushApiTask))
     .then((id) => {
       return promoteAliases(funcs)
-      .map((alias) => setPermission(alias, id, env) )
+      .then(() => setPermissions(api, id, env) )
       .tap(() => done(permissionsTask))
       .return(id)
     })
     .then((id) => deployApi(id, env))
     .tap(() => done(deployTask))
   }
+}
+
+function setPermissions(api, id, env){
+  let promises = []
+  for (var path in api.paths){
+    for (var method in api.paths[path]){
+      if (api.paths[path][method]['x-amazon-apigateway-integration'].type === 'aws') {
+        const uri = api.paths[path][method]['x-amazon-apigateway-integration'].uri.split(':')
+        promises.push(setPermission({
+          env,
+          region: uri[8],
+          accountId: uri[9],
+          apiId: id,
+          name: uri[11]
+        }))
+      }
+    }
+  }
+  return Promise.all(promises)
 }

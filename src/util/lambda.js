@@ -29,26 +29,22 @@ export function setAlias(func, name){
     params.FunctionVersion = func.Version
     return updateAlias(params)
   })
-  .catch({ code: 'ResourceNotFoundException'}, ()=>{
+  .catch({ code: 'ResourceNotFoundException' }, ()=>{
     params.FunctionVersion = func.Version
     return createAlias(params)
   })
 }
 
 
-export function setPermission(alias, apiId, env){
-  const arn = alias.AliasArn.split(':')
-  const region = arn[3]
-  const accountId = arn[4]
-  const functionName = arn[6]
+export function setPermission({ name, region, env, apiId, accountId }){
 
   let params = {
     Action: 'lambda:InvokeFunction',
-    Qualifier: alias.Name,
-    FunctionName: functionName,
+    Qualifier: env,
+    FunctionName: name,
     Principal: 'apigateway.amazonaws.com',
-    StatementId: `api-gateway-access-${apiId}-${env}`,
-    SourceArn: `arn:aws:execute-api:${region}:${accountId}:${apiId}/${env}/*`
+    StatementId: `api-gateway-${apiId}`,
+    SourceArn: `arn:aws:execute-api:${region}:${accountId}:${apiId}/*`
   }
 
   return addPermission(params)
