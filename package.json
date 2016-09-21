@@ -39,14 +39,14 @@
     "cliui": "^3.2.0",
     "fs-extra-promise": "^0.4.0",
     "glob": "^7.0.0",
-    "globby": "^5.0.0",
+    "globby": "^6.0.0",
     "inquirer": "^1.0.3",
     "lodash": "^4.7.0",
     "loud-rejection": "^1.6.0",
     "observatory": "^1.0.0",
     "stream-buffers": "^3.0.0",
     "webpack": "^2.1.0-beta.20",
-    "yargs": "^4.8.1"
+    "yargs": "^5.0.0"
   },
   "devDependencies": {
     "ava": "^0.16.0",
