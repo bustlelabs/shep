@@ -44,7 +44,7 @@ Commands:
   generate                    Run `shep generate --help` for additional information
   new [path]                  Create a new shep project
   pull                        Pulls a swagger JSON representation of an existing API and writes it to a local file
-  push                        Create a new shep project
+  push                        Pushes the api.json swagger configuration to API Gateway. Does not deploy the API.
   run [name]                  Run a function in your local environemnt
 
 Options:
