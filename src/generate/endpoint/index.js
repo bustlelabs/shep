@@ -6,9 +6,14 @@ import { set } from 'lodash'
 module.exports = function(opts){
   const api = fs.readJSONSync('api.json')
 
-  if (opts.createFunction) { generateFunction(opts) }
+  const responseCode = opts.responseCode || 200
+  const contentType = opts.contentType || 'application/json'
+  const functionName = opts.functionName
+  const method = opts.method || 'get'
 
-  set(api, ['paths', opts.path, opts.method], buildEndpoint(opts) )
+  if (opts.createFunction) { generateFunction({ name: functionName }) }
+
+  set(api, ['paths', opts.path, method], buildEndpoint({ responseCode, contentType, functionName }) )
 
   return fs.writeJSONAsync('api.json', api)
 }
@@ -34,7 +39,7 @@ function buildEndpoint(opts){
       }
     },
     requestTemplates : {
-      [opts.contentType]: mapping
+      [opts.contentType]: mapping()
     },
     uri : `arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:{AWS_ACCOUNT_ID}:function:${opts.functionName}:\${stageVariables.functionAlias}/invocations`,
     passthroughBehavior : 'when_no_match',

@@ -15,8 +15,6 @@ example:
 }
 ```
 
-
-
 - Each function folder should have it's own `lambda.json file`. Any settings in here will override the project level settings. Important! Shep used to have function namespacing built in but now this is up to the end user. Functions are generated with the following lambda.json by default:
 
 ```json
@@ -24,7 +22,6 @@ example:
   "FunctionName": "$PROJECT_NAME-$FUNCTION_NAME"
 }
 ```
-
 
 - Remove all symlinks and instead reference the file directly. Webpack will handle bundling these files for you.
 - Remove `lib` directories for each function

@@ -144,6 +144,10 @@ Examples:
   shep build beta *-user       Build functions matching the pattern *-user
 ```
 
+## Migrating from shep 0.X
+
+More info on migrating to 1.0 can found in the [migration guide](https://github.com/bustlelabs/shep/blob/master/migration.mdw)
+
 ## Why the name 'shep'?
 
 It was called 'shepherd' at first because it was helpful for dealing with *lamb*da but everyone kept shortening it to 'shep' so we changed the name

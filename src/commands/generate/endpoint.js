@@ -16,7 +16,7 @@ export function builder (yargs){
   .describe('content-type', 'Default response content type')
   .default('content-type', 'application/json')
   .describe('function-name', 'Lambda function name')
-  .default('function-name', null, 'kebabCase(apiName path method)')
+  .default('function-name', null, 'kebabCase(projectName path method)')
 }
 
 export function handler () {
