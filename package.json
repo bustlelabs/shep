@@ -46,7 +46,7 @@
     "observatory": "^1.0.0",
     "stream-buffers": "^3.0.0",
     "webpack": "2.1.0-beta.22",
-    "yargs": "^4.8.1"
+    "yargs": "^6.2.0"
   },
   "devDependencies": {
     "ava": "^0.16.0",
