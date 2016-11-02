@@ -22,11 +22,11 @@ node_modules/*
 config/*`
 }
 
-export function lambda () {
+export function lambda (arn = '') {
   let obj = {
     Handler: 'index.handler',
     MemorySize: 128,
-    Role: '',
+    Role: arn,
     Timeout: 10,
     Runtime: 'nodejs4.3'
   }
@@ -34,7 +34,22 @@ export function lambda () {
   return JSON.stringify(obj, null, 2)
 }
 
-export function pkg (apiName) {
+export function lambdaRole () {
+  return `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}`
+}
+
+export function pkg ({ apiName, accountId = '', region = '' }) {
   let obj = {
     name: apiName,
     version: '1.0.0',
@@ -46,8 +61,8 @@ export function pkg (apiName) {
       minimatch: '3.0.3'
     },
     shep: {
-      region: '',
-      accountId: '',
+      region: region,
+      accountId: accountId,
       apiId: ''
     }
   }
