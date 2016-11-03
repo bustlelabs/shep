@@ -17,3 +17,13 @@ export function getRole (name) {
 
   return iam.getRole(params).promise().get('Role').get('Arn')
 }
+
+export function attachPolicy (name) {
+  const iam = new AWS.IAM()
+  const params = {
+    PolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
+    RoleName: name
+  }
+
+  return iam.attachRolePolicy(params).promise()
+}

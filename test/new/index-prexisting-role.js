@@ -20,6 +20,7 @@ test.before(() => {
 
 test('If role is found, no role is created', () => {
   td.verify(iam.createRole(), { times: 0, ignoreExtraArgs: true })
+  td.verify(iam.attachPolicy(), { times: 0, ignoreExtraArgs: true })
   td.verify(fs.writeFile(), { ignoreExtraArgs: true })
   td.verify(exec(), { ignoreExtraArgs: true })
 })

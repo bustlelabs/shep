@@ -24,4 +24,5 @@ test('Creates role and writes configured templates', () => {
   td.verify(exec(), { ignoreExtraArgs: true })
   td.verify(templates.pkg({ apiName: path, region, accountId }))
   td.verify(templates.lambda(roleArn))
+  td.verify(iam.attachPolicy(rolename))
 })

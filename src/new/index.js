@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from '../util/modules/fs'
-import { getRole, createRole } from '../util/aws/iam'
+import { getRole, createRole, attachPolicy } from '../util/aws/iam'
 import * as templates from './templates'
 import Promise from 'bluebird'
 import exec from '../util/modules/exec'
@@ -42,16 +42,21 @@ export default function run (opts) {
 
 function setupIam (context) {
   const rolename = context.rolename
+  let newRole = false
 
   if (!rolename) {
     return Promise.resolve()
   }
 
   return getRole(rolename)
-  .catch({ code: 'NoSuchEntity' }, () => createRole(rolename))
+  .catch({ code: 'NoSuchEntity' }, () => {
+    newRole = true
+    return createRole(rolename)
+  })
   .tap(arn => {
     context.arn = arn
   })
+  .then(() => { if (newRole) return attachPolicy(rolename) })
 }
 
 function createSubDirs ({ path }) {
