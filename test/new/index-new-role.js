@@ -11,7 +11,7 @@ const accountId = '123412341234'
 const roleArn = `arn:aws:iam:${accountId}:role/${rolename}`
 const templates = td.replace('../../src/new/templates')
 const iam = td.replace('../../src/util/aws/iam')
-td.when(iam.getRole(rolename)).thenReturn(Promise.reject({ statusCode: 404 }))
+td.when(iam.getRole(rolename)).thenReturn(Promise.reject({ code: 'NoSuchEntity' }))
 td.when(iam.createRole(rolename)).thenReturn(Promise.resolve(roleArn))
 
 test.before(() => {

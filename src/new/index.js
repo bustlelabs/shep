@@ -48,10 +48,7 @@ function setupIam (context) {
   }
 
   return getRole(rolename)
-  .catch(err => {
-    if (err.statusCode === 404) return createRole(rolename)
-    return Promise.reject(err)
-  })
+  .catch({ code: 'NoSuchEntity' }, () => createRole(rolename))
   .tap(arn => {
     context.arn = arn
   })
