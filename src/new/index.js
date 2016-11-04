@@ -10,7 +10,7 @@ export default function run (opts) {
   const rolename = opts.rolename
   const region = opts.region
 
-  const tasks = listr([
+  let tasks = [
     {
       title: `Setup IAM Role`,
       task: setupIam
@@ -35,18 +35,17 @@ export default function run (opts) {
       title: 'Initialize Git',
       task: initGit
     }
-  ], opts.quiet)
+  ]
 
-  return tasks.run({ path, rolename, region })
+  if (!rolename) tasks = tasks.splice(1)
+
+  return listr(tasks, opts.quiet)
+    .run({ path, rolename, region })
 }
 
 function setupIam (context) {
   const rolename = context.rolename
   let newRole = false
-
-  if (!rolename) {
-    return Promise.resolve()
-  }
 
   return getRole(rolename)
   .catch({ code: 'NoSuchEntity' }, () => {
@@ -57,6 +56,9 @@ function setupIam (context) {
     context.arn = arn
   })
   .then(() => { if (newRole) return attachPolicy(rolename) })
+  .catch({ code: 'LimitExceeded' }, () => {
+    return Promise.reject('Current AWS User does not have sufficient permissions to do this')
+  })
 }
 
 function createSubDirs ({ path }) {
