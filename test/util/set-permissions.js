@@ -18,6 +18,11 @@ const api = {
         'x-amazon-apigateway-integration': {
           uri: `arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountId}:function:${name}:\${stageVariables.functionAlias}/invocations`
         }
+      },
+      post: {
+        'x-amazon-apigateway-integration': {
+          uri: `arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountId}:function:${name}/invocations`
+        }
       }
     }
   }
@@ -32,6 +37,6 @@ test('Calls setPermission', () => {
       accountId,
       region,
       name
-    })))
+    })), { times: 2 })
   })
 })
