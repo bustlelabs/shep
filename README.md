@@ -13,7 +13,7 @@ Amazon Web Services [API gateway](https://aws.amazon.com/api-gateway/) and [Lamb
 
 ### Prerequisites
 
-It will be helpful to have some existing experience with API gateway and Lambda. If you have never used either of these tools before, it is recommended to setup a function manually to see how things are done. Please refer to Amazon's own [getting started guide](http://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started.html)  
+It will be helpful to have some existing experience with API gateway and Lambda. If you have never used either of these tools before, it is recommended to setup a function manually to see how things are done. Please refer to Amazon's own [getting started guide](http://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started.html)
 
 ### AWS credentials
 
@@ -21,7 +21,7 @@ Shep will require your amazon credentials and will load them using the same meth
 
 ### Installation
 
-`npm install -g shep@beta`
+`npm install -g shep`
 
 ### Creating a new API
 
