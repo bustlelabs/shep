@@ -6,4 +6,4 @@ test.before(() => {
   return shep.build({ quiet: true })
 })
 
-test(didExec, 'webpack')
+test(didExec, 'webpack', ['--bail'])
