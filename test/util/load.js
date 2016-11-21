@@ -25,3 +25,8 @@ test('Loads lambda config', (t) => {
   t.is(config.Role, 'admin')
   t.is(config.Memory, 5)
 })
+
+test('Is ok with no api config', (t) => {
+  const config = load.api()
+  t.is(config, null)
+})
