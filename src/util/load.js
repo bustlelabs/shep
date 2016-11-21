@@ -40,5 +40,9 @@ export function pkg () {
 }
 
 export function api () {
-  return readJSONSync('api.json')
+  try {
+    return readJSONSync('api.json')
+  } catch (e) {
+    return null
+  }
 }
