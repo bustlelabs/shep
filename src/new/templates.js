@@ -1,5 +1,3 @@
-import {version} from '../index'
-
 export function api (apiName) {
   return `{
   "swagger": "2.0",
@@ -55,6 +53,7 @@ export function lambdaRole () {
 }
 
 export function pkg ({ apiName, accountId = '', region = '' }) {
+  const version = require('../index').version
   let obj = {
     name: apiName,
     version: '1.0.0',
