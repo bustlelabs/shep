@@ -1,3 +1,5 @@
+import {version} from '../index'
+
 export function api (apiName) {
   return `{
   "swagger": "2.0",
@@ -6,20 +8,23 @@ export function api (apiName) {
   },
   "schemes": [ "https" ],
   "paths": {}
-}`
+}
+`
 }
 
 export function env (env) {
   return `module.exports = {
   env: "${env}",
   secretkey: "${env}-secret-key"
-}`
+}
+`
 }
 
 export function gitignore () {
   return `dist/*
 node_modules/*
-config/*`
+config/*
+`
 }
 
 export function lambda (arn = '') {
@@ -58,7 +63,8 @@ export function pkg ({ apiName, accountId = '', region = '' }) {
     license: '',
     devDependencies: {
       webpack: '2.1.0-beta.25',
-      minimatch: '3.0.3'
+      minimatch: '3.0.3',
+      shep: version
     },
     shep: {
       region: region,
@@ -71,7 +77,8 @@ export function pkg ({ apiName, accountId = '', region = '' }) {
 }
 
 export function readme (apiName) {
-  return `# ${apiName}`
+  return `# ${apiName}
+`
 }
 
 export function webpack () {
@@ -87,11 +94,11 @@ const env = process.env.NODE_ENV || 'development'
 const pattern = process.env.PATTERN || '*'
 
 const entry = fs.readdirSync('functions')
-.filter(minimatch.filter(pattern))
-.reduce((map, funcName) => {
-  map[funcName] = path.resolve(\`functions/\${funcName}/index\`)
-  return map
-}, {})
+  .filter(minimatch.filter(pattern))
+  .reduce((map, funcName) => {
+    map[funcName] = path.resolve(\`functions/\${funcName}/index\`)
+    return map
+  }, {})
 
 module.exports = {
   target: 'node',
