@@ -12,7 +12,7 @@ const results = { success: 'SUCCESS', error: 'ERROR', exception: 'EXCEPTION' }
 
 const awsNodeVersion = '4.3.2'
 
-export default function (opts) {
+export default async function (opts) {
   AWS.config.update({region: opts.region})
 
   const processVersion = process.versions.node
@@ -31,39 +31,41 @@ export default function (opts) {
 
   const context = {}
 
-  return Promise.resolve()
-  .then(() => { if (performBuild === true) return build(name, env) })
-  .then(() => requireProject(`dist/${name}/${fileName}`)[handler])
-  .then((func) => {
-    return Promise.map(events, (eventFilename) => {
-      const event = requireProject(`functions/${name}/events/${eventFilename}`)
-      return new Promise((resolve) => {
-        let output = { name: eventFilename }
-        output.start = new Date()
-        try {
-          func(event, context, (err, res) => {
-            output.end = new Date()
-            if (err) {
-              output.result = results.error
-              output.response = err
-            } else {
-              output.result = results.success
-              output.response = res
-            }
-            resolve(output)
-          })
-        } catch (e) {
+  if (performBuild) {
+    await build(name, env)
+  }
+
+  const func = requireProject(`dist/${name}/${fileName}`)[handler]
+
+  const out = await Promise.map(events, (eventFilename) => {
+    const event = requireProject(`functions/${name}/events/${eventFilename}`)
+    return new Promise((resolve) => {
+      const output = { name: eventFilename }
+      output.start = new Date()
+      try {
+        func(event, context, (err, res) => {
           output.end = new Date()
-          output.result = results.exception
-          output.response = e
+          if (err) {
+            output.result = results.error
+            output.response = err
+          } else {
+            output.result = results.success
+            output.response = res
+          }
           resolve(output)
-        }
-      })
+        })
+      } catch (e) {
+        output.end = new Date()
+        output.result = results.exception
+        output.response = e
+        resolve(output)
+      }
     })
   })
-  .tap(logOutput)
-  .map((out) => formatOutput(out, verbose))
-  .then(() => console.log(ui.toString()))
+
+  logOutput(out)
+  out.map((out) => formatOutput(out, verbose))
+  console.log(ui.toString())
 }
 
 function logOutput (outputs) {
