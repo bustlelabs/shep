@@ -34,7 +34,7 @@ export function lambda (arn = '') {
     Runtime: 'nodejs4.3'
   }
 
-  return JSON.stringify(obj, null, 2)
+  return JSON.stringify(obj, null, 2) + '\n'
 }
 
 export function lambdaRole () {
@@ -72,7 +72,7 @@ export function pkg ({ apiName, accountId = '', region = '' }) {
     }
   }
 
-  return JSON.stringify(obj, null, 2)
+  return JSON.stringify(obj, null, 2) + '\n'
 }
 
 export function readme (apiName) {
@@ -90,12 +90,21 @@ const path = require('path')
 const minimatch = require('minimatch')
 
 const env = process.env.NODE_ENV || 'development'
+
+const shepConfig = path.resolve(\`config/$\{env\}.js\`)
+
+try {
+  fs.statSync(shepConfig)
+} catch (e) {
+  throw new Error(\`cannot read config file for environment "$\{env\}": $\{e.message\}\`)
+}
+
 const pattern = process.env.PATTERN || '*'
 
 const entry = fs.readdirSync('functions')
   .filter(minimatch.filter(pattern))
   .reduce((map, funcName) => {
-    map[funcName] = path.resolve(\`functions/\${funcName}/index\`)
+    map[funcName] = path.resolve(\`functions/\$\{funcName\}/index\`)
     return map
   }, {})
 
@@ -110,8 +119,7 @@ module.exports = {
   resolve: {
     modules: [ 'node_modules', 'lib' ],
     alias: {
-      'shep-config': path.resolve(\`config/\${env}.js\`)
-    }
+      'shep-config': shepConfig
   }
 }
 `
