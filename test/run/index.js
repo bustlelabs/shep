@@ -22,4 +22,3 @@ test.before(() => {
 test('Calls the function', () => {
   td.verify(lambdaFunc[handler](), { ignoreExtraArgs: true })
 })
-

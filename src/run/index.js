@@ -41,6 +41,10 @@ export default async function (opts) {
   }
 
   const func = requireProject(`dist/${name}/${fileName}`)[handler]
+  console.log(func)
+  if (func === undefined) {
+    throw new Error(`No handler found at dist/${name}/${fileName}[${handler}]`);
+  }
 
   const out = await Promise.map(events, (eventFilename) => {
     const event = requireProject(`functions/${name}/events/${eventFilename}`)
