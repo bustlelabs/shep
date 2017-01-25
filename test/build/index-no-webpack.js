@@ -5,7 +5,7 @@ import td from '../helpers/testdouble'
 let error = new Error()
 error.code = 'ENOENT'
 
-td.when(exec('webpack', ['--bail']), { ignoreExtraArgs: true }).thenReject(error)
+td.when(exec('webpack --bail'), { ignoreExtraArgs: true }).thenReject(error)
 td.replace(console, 'warn')
 
 test('Logs to console when no webpack found', async (t) => {

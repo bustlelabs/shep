@@ -82,6 +82,6 @@ function createFiles ({ path, arn, region }) {
 }
 
 function npmInstall ({ path }) {
-  return exec('npm', ['install'], { cwd: path })
+  return exec('npm install', { cwd: path })
 }
 

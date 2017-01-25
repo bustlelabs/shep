@@ -27,5 +27,5 @@ test(wroteFile, `${path}/.gitignore`)
 test(wroteFile, `${path}/README.md`)
 test(wroteFile, `${path}/webpack.config.js`)
 
-test(didExec, 'npm', ['install'])
+test(didExec, 'npm install')
 

@@ -2,9 +2,7 @@ import test from 'ava'
 import { exec, didExec } from '../helpers/exec'
 import td from '../helpers/testdouble'
 
-const command = 'custom-build'
-const args = ['--cool-flag', '-x', '6']
-const buildCommand = `${command} ${args.join(' ')}`
+const buildCommand = 'custom-build --cool-flag -x 6'
 
 const load = td.replace('../../src/util/load')
 td.when(load.pkg()).thenReturn({ shep: { buildCommand } })
@@ -16,4 +14,4 @@ test.before(() => {
   return shep.build({ quiet: true })
 })
 
-test(didExec, command, args)
+test(didExec, buildCommand)
