@@ -19,8 +19,8 @@ export function dotEnv () {
 }
 
 export function gitignore () {
-  return `dist/*
-node_modules/*
+  return `dist
+node_modules
 .env
 `
 }
