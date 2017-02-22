@@ -17,7 +17,7 @@ export function builder (yargs) {
   .example('shep deploy production', 'Deploy all functions with production env variables')
   .example('shep deploy beta --no-build', 'Deploy all functions as currently built in the dist folder')
   .example('shep deploy production create-user', 'Deploy only the create-user function')
-  .example('shep deploy beta *-user', 'Deploy only functions matching the pattern *-user')
+  .example('shep deploy beta \'*-user\'', 'Deploy only functions matching the pattern *-user')
 }
 
 export async function handler (opts) {

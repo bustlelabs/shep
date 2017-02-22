@@ -69,7 +69,7 @@ _Coming soon! See [`shep new`](#shep-new)_
 Usage: shep <command> [options]
 
 Commands:
-  build [env] [functions]   Builds functions and writes them to disk
+  build [functions]         Builds functions and writes them to disk
   deploy [env] [functions]  Deploy both functions and APIs to AWS. Will create a new API if the ID is not specified
   generate                  Run `shep generate --help` for additional information
   logs [stage] [name]       Streams logs from the specified version of a function
@@ -93,6 +93,7 @@ Options:
   --skip-config  Skips configuring shep project                                                                [boolean]
   --region       Region for new shep project
   --rolename     Name of IAM Role which will be used to execute Lambda functions
+  -q, --quiet    Don't log anything                                                                     [default: false]
 
 Examples:
   shep new         Launch an interactive CLI
@@ -109,6 +110,8 @@ Options:
   --stage, -s   AWS API Gateway stage. Read from the shep config in package.json if not provided              [required]
   --api-id, -a  AWS API Gateway ID. Read from the shep config in package.json if not provided                 [required]
   --output, -o  Path of the file to output                                                         [default: "api.json"]
+  -q, --quiet   Don't log anything                                                                      [default: false]
+  --build                                                                                                [default: true]
 
 Examples:
   shep pull                           Download a JSON swagger file for `apiId` in package.json and prompts for stage via
@@ -121,10 +124,11 @@ Examples:
 shep push
 
 Options:
-  --version  Show version number                                                                               [boolean]
-  --help     Show help                                                                                         [boolean]
-  --api-id   API Gateway resource id. Read from package.json if not provided                                  [required]
-  --region   AWS region. Read from package.json if not provided                                               [required]
+  --version    Show version number                                                                             [boolean]
+  --help       Show help                                                                                       [boolean]
+  --api-id     API Gateway resource id. Read from package.json if not provided                                [required]
+  --region     AWS region. Read from package.json if not provided                                             [required]
+  -q, --quiet  Don't log anything                                                                       [default: false]
 
 Examples:
   shep push                                  Pushes the api.json swagger configuration to API Gateway. Does not deploy
@@ -141,12 +145,12 @@ Options:
   --environment  Environment variables to use                                                   [default: "development"]
   --event        Event to use
   -v             Responses from functions aren't truncated
-  --build        Build functions before running. Use --no-build to skip this step                        [default: true]
+  --build        Build functions before running. If omitted functions are transpiled by babel on the fly[default: false]
 
 Examples:
   shep run                               Launch an interactive CLI
   shep run foo                           Runs the `foo` function for all events
-  shep run foo --no-build                Run the already built `foo` function in the dist folder
+  shep run foo --build                   Builds the `foo` function and then runs it
   shep run foo --event default           Runs the `foo` function for just the `default` event
   shep run foo --environment production  Runs the `foo` function with production environment
   DB_TABLE=custom shep run foo           Runs the `foo` function with process.env.DB_TABLE assigned to custom (vars
@@ -159,30 +163,32 @@ Examples:
 shep deploy [env] [functions]
 
 Options:
-  --version  Show version number                                                                               [boolean]
-  --help     Show help                                                                                         [boolean]
-  --build    Build functions before deployment. Use --no-build to skip this step                         [default: true]
+  --version    Show version number                                                                             [boolean]
+  --help       Show help                                                                                       [boolean]
+  --build      Build functions before deployment. Use --no-build to skip this step                       [default: true]
+  -q, --quiet  Don't log anything                                                                       [default: false]
 
 Examples:
   shep deploy                         Launch an interactive CLI
   shep deploy production              Deploy all functions with production env variables
   shep deploy beta --no-build         Deploy all functions as currently built in the dist folder
   shep deploy production create-user  Deploy only the create-user function
-  shep deploy beta *-user             Deploy only functions matching the pattern *-user
+  shep deploy beta '*-user'           Deploy only functions matching the pattern *-user
 ```
 #### `shep build`
 ```
-shep build [env] [functions]
+shep build [functions]
 
 Options:
-  --version  Show version number                                                                               [boolean]
-  --help     Show help                                                                                         [boolean]
+  --version    Show version number                                                                             [boolean]
+  --help       Show help                                                                                       [boolean]
+  -q, --quiet  Don't log anything                                                                       [default: false]
 
 Examples:
-  shep build                   Launch an interactive CLI
-  shep build beta              Build all functions with beta environment variables
-  shep build beta create-user  Build only the create-user function
-  shep build beta *-user       Build functions matching the pattern *-user
+  shep build              Launch an interactive CLI
+  shep build '*'          Build all functions
+  shep build create-user  Build only the create-user function
+  shep build '*-user'     Build functions matching the pattern *-user
 ```
 #### `shep logs`
 ```
@@ -247,9 +253,10 @@ Examples:
 shep generate function [name]
 
 Options:
-  --version  Show version number                                                                               [boolean]
-  --help     Show help                                                                                         [boolean]
-  --name     Function name
+  --version    Show version number                                                                             [boolean]
+  --help       Show help                                                                                       [boolean]
+  --name       Function name
+  -q, --quiet  Don't log anything                                                                       [default: false]
 
 Examples:
   shep generate function      Launch an interactive CLI
@@ -261,9 +268,10 @@ Examples:
 shep generate endpoint [path]
 
 Options:
-  --version  Show version number                                                                               [boolean]
-  --help     Show help                                                                                         [boolean]
-  --method   HTTP Method                                     [choices: "get", "post", "put", "delete", "options", "any"]
+  --version    Show version number                                                                             [boolean]
+  --help       Show help                                                                                       [boolean]
+  --method     HTTP Method                                   [choices: "get", "post", "put", "delete", "options", "any"]
+  -q, --quiet  Don't log anything                                                                       [default: false]
 ```
 #### `shep generate webpack`
 ```
