@@ -13,8 +13,7 @@ export default function (api) {
   const functions = methods.map(({ path, method }) => {
     const integration = api.paths[path][method]['x-amazon-apigateway-integration']
     if (!integration) { return { path, method } }
-    if (integration.type !== 'aws_proxy') { return { path, method } }
-    return { path, method, uri: api.paths[path][method]['x-amazon-apigateway-integration'].uri }
+    return { path, method, integration }
   })
 
   return functions

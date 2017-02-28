@@ -7,9 +7,9 @@ export default function () {
   if (!api) { return [] }
 
   const funcNames = load.funcs('*')
-  const integrations = parseApi(api)
+  const parsedApi = parseApi(api)
   const unreferencedFunctions = funcNames.filter((funcName) => {
-    return !integrations.some(({ uri }) => isFuncInUri(funcName, uri))
+    return !parsedApi.some(({ integration }) => isFuncInUri(funcName, integration.uri))
   })
 
   return unreferencedFunctions.map(generateWarning)

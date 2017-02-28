@@ -32,19 +32,18 @@ test('Should handle multiple http methods correctly', (t) => {
   t.deepEqual(api.map(({ method }) => method), ['get', 'post'])
 })
 
-test('Should check integration type', (t) => {
+test('Should pass entire integration', (t) => {
+  const apiIntegration = { type: 'mock' }
   const api = {
     paths: {
       '/foo': {
         options: {
-          'x-amazon-apigateway-integration': {
-            type: 'mock'
-          }
+          'x-amazon-apigateway-integration': apiIntegration
         }
       }
     }
   }
 
   const parsedApi = parseApi(api)
-  parsedApi.map(({ uri }) => uri).forEach((uri) => t.falsy(uri))
+  parsedApi.map(({ integration }) => integration).forEach((integration) => t.deepEqual(integration, apiIntegration))
 })
