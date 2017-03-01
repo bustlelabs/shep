@@ -10,11 +10,10 @@ export default function (api) {
     return acc.concat(nestedMethods)
   }, [])
 
-  const functions = methods.map(({ path, method }) => {
+  const integrations = methods.map(({ path, method }) => {
     const integration = api.paths[path][method]['x-amazon-apigateway-integration']
-    if (!integration) { return { path, method } }
     return { path, method, integration }
   })
 
-  return functions
+  return integrations
 }

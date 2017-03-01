@@ -7,5 +7,8 @@ export default function () {
 }
 
 function generateWarning (version, pkgVersion) {
-  return { rule: 'shep-version-mismatch', message: `shep ${version} is being used, but package.json requires ${pkgVersion}` }
+  return {
+    rule: 'shep-version-mismatch',
+    message: `shep ${version} is being used, but package.json requires ${pkgVersion}`
+  }
 }

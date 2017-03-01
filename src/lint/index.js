@@ -1,17 +1,20 @@
 import * as rules from './rules'
 
 export default function (opts) {
-  // load all rules
-  // run all rules
+  const log = logger(opts.verbose)
   const ruleNames = Object.keys(rules).filter((name) => name !== 'toString' && name !== 'default')
   const warnings = ruleNames.map((name) => {
     return rules[name](opts)
   })
-  // concat warnings
   const flatWarnings = warnings.reduce((com, a) => com.concat(a), [])
-  // print warnings
-  if (!opts.quiet) { console.log(flatWarnings) }
-  // return warnings
+
+  if (!opts.quiet) { flatWarnings.forEach(log) }
   return flatWarnings
 }
 
+function logger (verbose) {
+  return ({ rule, message }) => {
+    if (verbose) { console.log(rule) }
+    console.log(message + '\n')
+  }
+}

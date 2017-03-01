@@ -24,7 +24,7 @@ function isFuncInUri (funcName, uri) {
 function generateWarning (funcName) {
   return {
     rule: 'unreferenced-functions',
-    message: `${funcName} isn't referenced by api.json`
+    message: `Function ${funcName} isn't referenced by api.json`
   }
 }
 

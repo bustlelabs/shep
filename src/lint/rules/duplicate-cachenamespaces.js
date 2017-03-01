@@ -7,33 +7,39 @@ export default function () {
 
   const parsedApi = parseApi(api)
 
-  const partitionByCache = parsedApi
-    .filter((endpoint) => endpoint.integration !== undefined)
-    .reduce((acc, endpoint) => {
-      const currentNamespace = endpoint.integration.cacheNamespace
-      if (currentNamespace === undefined) return acc
-      if (acc[currentNamespace] === undefined) {
-        acc[currentNamespace] = [endpoint]
-      } else {
-        acc[currentNamespace].push(endpoint)
-      }
-      return acc
-    }, {})
+  const partitionedByCache = parsedApi
+    .filter(hasIntegration)
+    .reduce(partitionByCache, {})
 
-  const duplicateNamespaces = Object.keys(partitionByCache)
-          .map((cacheName) => partitionByCache[cacheName])
+  const duplicateNamespaces = Object.keys(partitionedByCache)
+          .map((cacheName) => partitionedByCache[cacheName])
           .filter((partition) => partition.length > 1)
 
   return duplicateNamespaces.map(generateWarnings)
 }
 
+function hasIntegration ({ integration }) {
+  return integration !== undefined
+}
+
+function partitionByCache (acc, endpoint) {
+  const currentNamespace = endpoint.integration.cacheNamespace
+  if (currentNamespace === undefined) return acc
+  if (acc[currentNamespace] === undefined) {
+    acc[currentNamespace] = [endpoint]
+  } else {
+    acc[currentNamespace].push(endpoint)
+  }
+  return acc
+}
+
 function generateWarnings (partition) {
   const nameSpace = partition[0].integration.cacheNamespace
   const endpoints = partition.map(({ path, method }) => {
-    return `${path} ${method.toUpperCase()}`
+    return `  ${path} ${method.toUpperCase()}`
   }).join('\n')
   return {
     rule: 'duplicate-cachenamespaces',
-    message: `${nameSpace} is shared by the following: \n${endpoints}`
+    message: `cacheNamespace '${nameSpace}' is shared by the following: \n${endpoints}`
   }
 }

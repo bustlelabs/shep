@@ -3,12 +3,16 @@ import parseApi from '../../util/parse-api'
 
 export default function () {
   const parsedApi = parseApi(load.api())
-
-  const unaliasedEndpoints = parsedApi.filter(({ integration }) => {
-    return integration.uri && integration.uri.indexOf('${stageVariables.functionAlias}') === -1 // eslint-disable-line no-template-curly-in-string
-  })
+  const unaliasedEndpoints = parsedApi.filter(hasNoAlias)
 
   return unaliasedEndpoints.map(generateWarnings)
+}
+
+function hasNoAlias ({ integration }) {
+  const uri = integration.uri
+  const aliasString = '${stageVariables.functionAlias}' // eslint-disable-line no-template-curly-in-string
+
+  return uri && uri.indexOf(aliasString) === -1
 }
 
 function generateWarnings ({ path, method }) {
