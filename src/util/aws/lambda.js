@@ -1,21 +1,91 @@
 import AWS from './'
 import merge from 'lodash.merge'
 
-export function putFunction (config, ZipFile, envVars) {
+export function putFunction (env, config, ZipFile) {
   const lambda = new AWS.Lambda()
 
   validateConfig(config)
 
   const FunctionName = config.FunctionName
   const Publish = true
-  const lambdaConfig = merge(config, { Environment: { Variables: envVars } })
 
   return lambda.getFunction({ FunctionName }).promise()
-  .then(() => lambda.updateFunctionConfiguration(lambdaConfig).promise())
+  .then(putEnvironment(env, config))
   .then(() => lambda.updateFunctionCode({ ZipFile, FunctionName, Publish }).promise())
   .catch({ code: 'ResourceNotFoundException' }, () => {
     const params = merge(config, { Publish, Code: { ZipFile } })
     return lambda.createFunction(params).promise()
+  })
+}
+
+export function putEnvironment (env, config, envVars) {
+  const lambda = new AWS.Lambda()
+
+  validateConfig(config)
+
+  const params = {
+    FunctionName: config.FunctionName,
+    Qualifier: env
+  }
+
+  return lambda.getFunction(params).promise()
+  .then((awsFunction) => {
+    const envMap = mergeExistingEnv(awsFunction, envVars)
+    const lambdaConfig = merge(config, { Environment: { Variables: envMap } })
+    return lambda.updateFunctionConfiguration(lambdaConfig).promise()
+  })
+  .then(({ FunctionName }) => {
+    return lambda.publishVersion({ FunctionName }).promise()
+  })
+  .then((func) => {
+    setAlias(func, env)
+  })
+  .catch((e) => {
+    throw new Error(e)
+  })
+}
+
+export function removeEnvVars (env, config, envVars) {
+  const lambda = new AWS.Lambda()
+
+  validateConfig(config)
+
+  const params = {
+    FunctionName: config.FunctionName,
+    Qualifier: env
+  }
+
+  return lambda.getFunction(params).promise()
+  .then((awsFunction) => {
+    const envMap = deleteEnvVars(awsFunction, envVars)
+    const lambdaConfig = merge(config, { Environment: { Variables: envMap } })
+    return lambda.updateFunctionConfiguration(lambdaConfig).promise()
+  })
+  .then(({ FunctionName }) => {
+    return lambda.publishVersion({ FunctionName }).promise()
+  })
+  .then((func) => {
+    setAlias(func, env)
+  })
+  .catch((e) => {
+    throw new Error(e)
+  })
+}
+
+export function getEnvironment (env, { FunctionName }) {
+  const lambda = new AWS.Lambda()
+
+  const params = {
+    FunctionName,
+    Qualifier: env
+  }
+
+  return lambda.getFunction(params).promise()
+  .get('Configuration')
+  .get('Environment')
+  .get('Variables')
+  .catch((e) => {
+    throw new Error(`No environment variables exist for ${FunctionName}`)
   })
 }
 
@@ -73,4 +143,23 @@ function validateConfig (config) {
   if (!config.Role) {
     throw new Error('You need to specify a valid Role for your lambda functions. See the shep README for details.')
   }
+}
+
+function mergeExistingEnv (awsFunction, envVars = {}) {
+  if (awsFunction.Configuration.Environment) {
+    return merge(awsFunction.Configuration.Environment.Variables, envVars)
+  } else {
+    return envVars
+  }
+}
+
+function deleteEnvVars (awsFunction, envVars) {
+  envVars.forEach((envVar) => {
+    try {
+      delete awsFunction.Configuration.Environment.Variables[envVar]
+    } catch (e) {
+      throw new Error(`Variable ${envVar} does not exist on AWS`)
+    }
+  })
+  return awsFunction.Configuration.Environment.Variables
 }

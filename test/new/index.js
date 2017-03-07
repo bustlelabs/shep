@@ -18,7 +18,6 @@ test('No calls to AWS if no rolename', () => {
 
 test(createdDir, `${path}/functions`)
 test(createdDir, `${path}/functions`)
-test(createdDir, `${path}/environments`)
 
 test(wroteFile, `${path}/lambda.json`)
 test(wroteFile, `${path}/api.json`)
@@ -26,6 +25,7 @@ test(wroteFile, `${path}/package.json`)
 test(wroteFile, `${path}/.gitignore`)
 test(wroteFile, `${path}/README.md`)
 test(wroteFile, `${path}/webpack.config.js`)
+test(wroteFile, `${path}/.env`)
 
-test(didExec, 'npm', ['install'])
+test(didExec, 'npm install')
 

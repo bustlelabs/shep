@@ -13,11 +13,9 @@ td.when(load.funcs('*')).thenReturn(funcNames)
 td.when(load.lambdaConfig(), { ignoreExtraArgs: true }).thenReturn(config)
 td.when(load.events(), { ignoreExtraArgs: true }).thenReturn(events)
 
-const projectUtils = td.replace('../../src/util/require-project')
-td.when(projectUtils.requireProject(td.matchers.contains('events'))).thenReturn({})
-
-const requireUnbuilt = td.replace('../../src/util/require-unbuilt')
-td.when(requireUnbuilt(td.matchers.anything())).thenResolve(lambdaFunc)
+const requireProject = td.replace('../../src/util/require-project')
+td.when(requireProject(td.matchers.contains('events'))).thenReturn({})
+td.when(requireProject(td.matchers.contains(`functions`))).thenReturn(lambdaFunc)
 
 test.before(() => {
   return require('../../src/run/index')({ pattern: '*', build: false })
@@ -26,4 +24,3 @@ test.before(() => {
 test('Calls the functions', () => {
   td.verify(lambdaFunc[handler](), { times: funcNames.length, ignoreExtraArgs: true })
 })
-

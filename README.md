@@ -1,15 +1,19 @@
-# Shep
-
-A framework for building JavaScript APIs with AWS API Gateway and Lambda
-
 [![Build Status](https://travis-ci.org/bustlelabs/shep.svg?branch=master)](https://travis-ci.org/bustlelabs/shep)
 [![Code Climate](https://codeclimate.com/github/bustlelabs/shep/badges/gpa.svg)](https://codeclimate.com/github/bustlelabs/shep)
 
-## Why do you need this?
+<div align="center">
+<a href="https://github.com/bustlelabs/shep">
+<img src="https://typeset-beta.imgix.net/2017/2/21/471fd5d2-edd8-4e65-bce4-e93e79015bbb.png?w=400" />
+</a>
+<div>A framework for building JavaScript APIs with AWS API Gateway and Lambda</div>
+</div>
+
+
+## Make "Serverless" Simple
 
 Amazon Web Services [API gateway](https://aws.amazon.com/api-gateway/) and [Lambda](https://aws.amazon.com/lambda/) are great tools for building and deploying ["serverless"](http://cloudacademy.com/blog/aws-lambda-serverless-cloud/) applications. But using them to deploy more than a couple functions/endpoints involves an excessive amount of manual work such as zipping files, uploading via the web UI, configuring paths and function names, etc. Shep is built to automate as many of these tasks as possible, giving you the ability to deploy an entire API and suite of lambda functions with one CLI command.
 
-## Getting Started
+## Getting Started With Shep
 
 ### Prerequisites
 
@@ -23,24 +27,28 @@ Shep will require your amazon credentials and will load them using the same meth
 
 ```bash
 npm install -g shep
-npm install --save-dev shep // the global shep will run the local shep
+
+```
+```bash
+// Optionally install shep in your project. The global shep will run the project's shep
+npm install --save-dev shep
 ```
 
-Add a few lines to your `package.json`. Your [account id](https://console.aws.amazon.com/billing/home?#/account),
+Add a few lines to your `package.json`. Your [account id](https://console.aws.amazon.com/billing/home?#/account) can be found on the billing page of your aws account.
 
 ```json
 {
   "name": "my-great-package",
-  "shep": {
-    "accountId": "XXXXX",
-    "region": "us-east-1"
-  }
+    "shep": {
+      "accountId": "XXXXX",
+      "region": "us-east-1"
+    }
 }
 ```
 
-### Custom Builds
+### Custom Builds Commands
 
-By default shep builds all your functions using webpack. If your project requires a different build process, then edit your `package.json`. Before running your build command, shep populates the `PATTERN` environment variable which can be accessed as `process.env.PATTERN` in your build command. Be aware that using your own build process will break pattern matching for `shep build` unless your build command respects the `PATTERN` variable. 
+By default shep builds all your functions using webpack. If your project requires a different build process, then edit your `package.json`. Before running your build command, shep populates the `PATTERN` environment variable which can be accessed as `process.env.PATTERN` in your build command. Be aware that using your own build process will break pattern matching for `shep build` unless your build command respects the `PATTERN` variable.
 
 ```json
 {
@@ -52,12 +60,7 @@ By default shep builds all your functions using webpack. If your project require
 
 ### Creating a new API
 
-_Coming soon!_
-
-### Using an existing API Gateway project
-
-_Coming soon!_
-
+_Coming soon! See [`shep new`](#shep-new)_
 
 ## CLI Documentation
 
@@ -66,11 +69,11 @@ _Coming soon!_
 Usage: shep <command> [options]
 
 Commands:
-  build [env] [functions]   Builds functions and writes them to disk
+  build [functions]         Builds functions and writes them to disk
+  config                    Run `shep config --help` for additional information
   deploy [env] [functions]  Deploy both functions and APIs to AWS. Will create a new API if the ID is not specified
   doctor                    Checks your projects against best standards
   generate                  Run `shep generate --help` for additional information
-  lint                      Checks your projects against best standards
   logs [stage] [name]       Streams logs from the specified version of a function
   new [path]                Create a new shep project
   pull                      Pulls a swagger JSON representation of an existing API and writes it to a local file
@@ -153,7 +156,7 @@ Examples:
   shep run foo --event default           Runs the `foo` function for just the `default` event
   shep run foo --environment production  Runs the `foo` function with production environment
   DB_TABLE=custom shep run foo           Runs the `foo` function with process.env.DB_TABLE assigned to custom (vars
-                                         declared this way will overwrite vals in your environments/env.json file)
+                                         declared this way will overwrite vals in your .env file)
   shep run '*'                           Runs all functions for all events
   shep run 'foo-*'                       Runs all functions matching pattern `foo-*`
 ```
@@ -176,7 +179,7 @@ Examples:
 ```
 #### `shep build`
 ```
-shep build [env] [functions]
+shep build [functions]
 
 Options:
   --version    Show version number                                                                             [boolean]
@@ -259,11 +262,11 @@ Examples:
 Usage: shep <command> [options]
 
 Commands:
-  build [env] [functions]   Builds functions and writes them to disk
+  build [functions]         Builds functions and writes them to disk
+  config                    Run `shep config --help` for additional information
   deploy [env] [functions]  Deploy both functions and APIs to AWS. Will create a new API if the ID is not specified
   doctor                    Checks your projects against best standards
   generate                  Run `shep generate --help` for additional information
-  lint                      Checks your projects against best standards
   logs [stage] [name]       Streams logs from the specified version of a function
   new [path]                Create a new shep project
   pull                      Pulls a swagger JSON representation of an existing API and writes it to a local file
@@ -277,7 +280,67 @@ Options:
 
 ## Lambda Execution Role
 
-More details to come, but check out the AWS docs about setting up the proper IAM role for lambda: http://docs.aws.amazon.com/lambda/latest/dg/intro-permission-model.html http://docs.aws.amazon.com/lambda/latest/dg/with-s3-example-create-iam-role.html
+Here is the minimum policy to allow shep to modify functions and APIs in Lambda and API Gateway
+Note: change the values of the variables at the top with the actual values of your project in the body of the policy, and note the comment about vpcs
+
+```
+// account id: 12345678
+// project name: coolproject
+// api gateway apiId: abcdefghi
+{
+  "Version": "2012-10-17",
+    "Statement": [
+    {
+      "Sid": "Stmt12345000",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:*",
+      "lambda:GetFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:us-east-1:12345678:function:coolproject-*"
+      ]
+    },
+    {
+      "Sid": "Stmt12345001",
+      "Effect": "Allow",
+      "Action": [
+        "apigateway:*"
+      ],
+      "Resource": [
+        "arn:aws:apigateway:us-east-1::/restapis/abcdefghi",
+      "arn:aws:apigateway:us-east-1::/restapis/abcdefghi/*"
+      ]
+    },
+    {
+      "Sid": "Stmt12345002",
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::12345678:role/shepRole"
+      ]
+    },
+    // Probably only needed if you use vpcs
+    {
+      "Sid": "Stmt12345003",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSecurityGroups",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeVpcs"
+      ],
+      "Resource":
+        "*"
+    }
+  ]
+}
+```
+
+## Upgrading
+
+Read the [migration docs](https://github.com/bustlelabs/shep/blob/master/migration.md) for information on upgrading major version changes
 
 ## Why the name 'shep'?
 

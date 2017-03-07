@@ -37,3 +37,13 @@ export function pushApi (api, id) {
     return apiGateway.importRestApi(params).promise().get('id')
   }
 }
+
+export function aliases (id) {
+  const apiGateway = new AWS.APIGateway()
+
+  let params = {
+    restApiId: id
+  }
+
+  return apiGateway.getStages(params).promise()
+}

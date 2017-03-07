@@ -13,11 +13,14 @@ td.when(load.funcs(funcName)).thenReturn([funcName])
 td.when(load.lambdaConfig(funcName)).thenReturn(config)
 td.when(load.events(funcName, td.matchers.anything())).thenReturn(events)
 
+const build = td.replace('../../src/util/build-functions')
+td.when(build(funcName, td.matchers.anything())).thenResolve({})
+
 const requireProject = td.replace('../../src/util/require-project')
-td.when(requireProject(td.matchers.contains(`functions/${funcName}`))).thenReturn(lambdaFunc)
+td.when(requireProject(td.matchers.contains(`dist/${funcName}`))).thenReturn(lambdaFunc)
 
 test.before(async () => {
-  return await require('../../src/run/index')({ pattern: funcName, build: false })
+  return await require('../../src/run/index')({ pattern: funcName, build: true })
 })
 
 test('Calls the function', () => {

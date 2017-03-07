@@ -1,3 +1,5 @@
+# Migrations for 0.X to 1.0 and 2.X to 3.0
+
 ## Migrating from shep 0.X to shep 1.0
 
 - Shep 1.0 only supports node 4.3. Make sure all functions are using the `callback` style instead of the old `context.done()` methods
@@ -77,3 +79,7 @@ json, and it should live inside the `/environments` directory
 - Environment vars are now stored on `process.env`, like `process.env.ENV`. 
 - Capitalize all config keys inside environment files
 - `shep run` accepts custom process.env key value pairs, e.g., `DB_TABLE=custom shep run ${functionName}`
+
+## Migrating from shep 3.X to shep 4.0
+
+- Shep 4.0 now handles environment variables in AWS. See the docs for `shep config` to add, remove, and list environment variables for your functions.

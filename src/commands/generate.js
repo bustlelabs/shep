@@ -6,12 +6,3 @@ export function builder (yargs) {
   .demand(1)
   .strict()
 }
-
-export function handler (args) {
-  // inquirer.prompt([{
-  //   type: 'list',
-  //   name: 'generator',
-  //   message: 'Select generator',
-  //   choices: ['endpoint', 'function']
-  // }])
-}

@@ -1,0 +1,10 @@
+{
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "standard",
+    "plugin:import/errors",
+    "plugin:import/warnings"
+  ]
+}

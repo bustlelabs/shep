@@ -8,7 +8,7 @@ const pkg = {
     region: 'us-east-1'
   }
 }
-const env = 'development'
+const stage = 'development'
 const functionName = 'bar'
 const callback = td.function('callback')
 const getLogResponse = {
@@ -27,7 +27,7 @@ td.when(getLogs(), { ignoreExtraArgs: true }).thenReturn(Promise.resolve(getLogR
 
 test.before(() => {
   const shep = require('../../src/index')
-  shep.logs({ env, name: functionName, stream: false })
+  shep.logs({ stage, name: functionName, stream: false })
 })
 
 test('Gets alias version', () => {

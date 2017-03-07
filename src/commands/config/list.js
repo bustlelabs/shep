@@ -1,20 +1,14 @@
 import inquirer from 'inquirer'
-import logs from '../logs'
-import * as load from '../util/load'
+import configList from '../../config-list'
+import * as load from '../../util/load'
 import merge from 'lodash.merge'
 
-export const command = 'logs [stage] [name]'
-export const desc = 'Streams logs from the specified version of a function'
+export const command = 'list [env] [function]'
+export const desc = 'List environment variables on AWS for an alias'
 export function builder (yargs) {
   return yargs
   .pkgConf('shep', process.cwd())
-  .describe('stage', 'Name of stage to use')
-  .describe('name', 'Name of function to use')
-  .describe('region', 'Name of region to use, uses region in `package.json` if not given')
-  .boolean('stream', 'Stream logs')
-  .default('stream', true)
-  .example('shep logs', 'Launch an interactive CLI')
-  .example('shep logs production foo', 'Shows logs for the `foo` function in the production environment')
+  .example('shep config beta foo', 'List environment variables for function "foo" beta alias')
 }
 
 export async function handler (opts) {
@@ -24,13 +18,13 @@ export async function handler (opts) {
   if (envs && envs.length > 0) {
     questions = [
       {
-        name: 'stage',
-        message: 'Stage',
+        name: 'env',
+        message: 'Environment',
         type: 'list',
         choices: () => envs
       },
       {
-        name: 'name',
+        name: 'function',
         message: 'Function',
         type: 'list',
         choices: () => load.funcs()
@@ -38,10 +32,9 @@ export async function handler (opts) {
     ]
   } else {
     if (!opts.env) { console.log('no API found, cannot load available aliases') }
-
     questions = [
       {
-        name: 'name',
+        name: 'function',
         message: 'Function',
         type: 'list',
         choices: () => load.funcs()
@@ -51,5 +44,5 @@ export async function handler (opts) {
 
   inquirer.prompt(questions.filter((q) => !opts[q.name]))
   .then((inputs) => merge({}, inputs, opts))
-  .then(logs)
+  .then(configList)
 }

@@ -1,9 +1,14 @@
 import { readdirSync, readJSONSync } from './modules/fs'
 import minimatch from 'minimatch'
+import { aliases } from './aws/api-gateway'
 
-export function envs () {
-  return readdirSync('environments')
-  .map((file) => file.split('.').shift())
+export async function envs () {
+  const api = this.api()
+  if (api && api.id) {
+    return aliases(api.id)
+  } else {
+    return []
+  }
 }
 
 export function events (func, eventName) {
@@ -19,7 +24,7 @@ export function events (func, eventName) {
   return events
 }
 
-export function funcs (pattern = '*') {
+export async function funcs (pattern = '*') {
   const funcs = readdirSync('functions').filter(minimatch.filter(pattern))
   if (funcs.length === 0) {
     throw new Error(`No functions found matching patterns: ${JSON.stringify(funcs)}`)
@@ -45,24 +50,6 @@ export function api () {
   } catch (e) {
     return null
   }
-}
-
-export function envVars (env) {
-  let envConfig
-  try {
-    envConfig = readJSONSync(`environments/${env}.json`)
-  } catch (e) {
-    return {}
-  }
-
-  Object.keys(envConfig).forEach(key => {
-    let val = envConfig[key]
-    if (typeof val !== 'string') {
-      throw new Error(`Config value '${val}' from key '${key}' must be a string`)
-    }
-  })
-
-  return envConfig
 }
 
 export function babelrc () {

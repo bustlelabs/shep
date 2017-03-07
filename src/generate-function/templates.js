@@ -21,7 +21,7 @@ export function event () {
     body: null
   }
 
-  return JSON.stringify(obj, null, 2)
+  return JSON.stringify(obj, null, 2) + '\n'
 }
 
 export function lambda (name) {
@@ -30,5 +30,5 @@ export function lambda (name) {
     Description: ''
   }
 
-  return JSON.stringify(obj, null, 2)
+  return JSON.stringify(obj, null, 2) + '\n'
 }

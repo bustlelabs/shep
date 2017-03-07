@@ -10,18 +10,18 @@ export function api (apiName) {
 `
 }
 
-export function env (env) {
+export function dotEnv () {
   return `{
-  "ENV": "${env}",
-  "SECRET_KEY": "${env}-secret-key"
+  "ENV": "development",
+  "SECRET_KEY": "development-secret-key"
 }
 `
 }
 
 export function gitignore () {
-  return `dist/*
-node_modules/*
-environments/*
+  return `dist
+node_modules
+.env
 `
 }
 

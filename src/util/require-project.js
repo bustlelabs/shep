@@ -1,9 +1,9 @@
 import path from 'path'
 
-export function requireProject (relativePath) {
+export default function (relativePath) {
   return require(projectPath(relativePath))
 }
 
-export function projectPath (relativePath) {
+function projectPath (relativePath) {
   return path.join(process.cwd(), relativePath)
 }

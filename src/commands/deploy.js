@@ -20,17 +20,25 @@ export function builder (yargs) {
   .example('shep deploy beta *-user', 'Deploy only functions matching the pattern *-user')
 }
 
-export function handler (opts) {
-  const questions = [
-    {
-      name: 'env',
-      message: 'Environment',
-      type: 'list',
-      choices: () => load.envs()
-    }
-  ]
+export async function handler (opts) {
+  const envs = await load.envs()
 
-  inquirer.prompt(questions.filter((q) => !opts[q.name]))
-  .then((inputs) => merge({}, inputs, opts))
-  .then(deploy)
+  if (envs && envs.length > 0) {
+    const questions = [
+      {
+        name: 'env',
+        message: 'Environment',
+        type: 'list',
+        choices: () => envs
+      }
+    ]
+
+    inquirer.prompt(questions.filter((q) => !opts[q.name]))
+    .then((inputs) => merge({}, inputs, opts))
+    .then(deploy)
+  } else {
+    if (!opts.env) { console.log('no API found, cannot load available aliases') }
+
+    deploy(opts)
+  }
 }

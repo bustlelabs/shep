@@ -68,6 +68,6 @@ export default function (opts) {
 
   return tasks.run()
   .then(() => {
-    console.log(`API URL: https://${apiId}.execute-api.${region}.amazonaws.com/${env}`)
+    if (apiId) { console.log(`API URL: https://${apiId}.execute-api.${region}.amazonaws.com/${env}`) }
   })
 }

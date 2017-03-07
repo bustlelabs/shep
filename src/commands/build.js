@@ -1,9 +1,6 @@
-import inquirer from 'inquirer'
 import build from '../build'
-import * as load from '../util/load'
-import merge from 'lodash.merge'
 
-export const command = 'build [env] [functions]'
+export const command = 'build [functions]'
 export const desc = 'Builds functions and writes them to disk'
 export function builder (yargs) {
   return yargs
@@ -16,17 +13,4 @@ export function builder (yargs) {
   .example('shep build beta *-user', 'Build functions matching the pattern *-user')
 }
 
-export function handler (opts) {
-  const questions = [
-    {
-      name: 'env',
-      message: 'Environment',
-      type: 'list',
-      choices: () => load.envs()
-    }
-  ]
-
-  inquirer.prompt(questions.filter((q) => !opts[q.name]))
-  .then((inputs) => merge({}, inputs, opts))
-  .then(build)
-}
+export const handler = build

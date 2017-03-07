@@ -7,7 +7,7 @@ import * as load from '../util/load'
 
 const integration = 'x-amazon-apigateway-integration'
 
-module.exports = function (opts) {
+export default function (opts) {
   let accountId = opts.accountId
   let path = opts.path
   let method = opts.method
