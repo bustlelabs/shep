@@ -18,6 +18,7 @@ function hasNoAlias ({ integration }) {
 function generateWarnings ({ path, method }) {
   return {
     rule: 'unaliased-uri',
+    type: 'error',
     message: `The integration of ${path} ${method.toUpperCase()} isn't aliased.`
   }
 }

@@ -9,6 +9,14 @@ export default function (opts) {
   const flatWarnings = warnings.reduce((com, a) => com.concat(a), [])
 
   if (!opts.quiet) { flatWarnings.forEach(log) }
+
+  const errors = warnings.filter(({ type }) => type === 'error').map(({ message }) => message)
+
+  if (errors.length > 0) {
+    console.error(errors.join('\n'))
+    process.exit(errors.length)
+  }
+
   return flatWarnings
 }
 

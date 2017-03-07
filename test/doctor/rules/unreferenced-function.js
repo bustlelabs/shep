@@ -7,7 +7,7 @@ const load = td.replace('../../../src/util/load', td.object(['funcs', 'api', 'pk
 td.when(load.funcs('*')).thenReturn(funcs)
 td.when(load.pkg()).thenReturn({ name: 'test' })
 
-const unreferencedFunction = require('../../../src/lint/rules/unreferenced-function')
+const unreferencedFunction = require('../../../src/doctor/rules/unreferenced-function')
 
 test('Should report missing functions', (t) => {
   const api = { paths: {} }

@@ -21,7 +21,7 @@ const mockApi = {
 
 const load = td.replace('../../../src/util/load', td.object(['api']))
 
-const duplicateCacheNamespaces = require('../../../src/lint/rules/duplicate-cachenamespaces')
+const duplicateCacheNamespaces = require('../../../src/doctor/rules/duplicate-cachenamespaces')
 
 test('No warnings when no api.json', (t) => {
   const warnings = duplicateCacheNamespaces({})

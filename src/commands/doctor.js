@@ -1,6 +1,6 @@
-import lint from '../lint'
+import lint from '../doctor'
 
-export const command = 'lint'
+export const command = 'doctor'
 export const desc = 'Checks your projects against best standards'
 export function builder (yargs) {
   return yargs
@@ -8,7 +8,7 @@ export function builder (yargs) {
   .describe('verbose', 'Logs additional information')
   .default('quiet', false)
   .alias('q', 'quiet')
-  .example('shep lint', 'Runs the linter on your project')
+  .example('shep doctor', 'Runs the doctor on your project')
 }
 
 export const handler = lint
