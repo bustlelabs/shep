@@ -1,3 +1,4 @@
+/* eslint import/namespace: ['error', { allowComputed: true }] */
 import * as rules from './rules'
 
 export default function (opts) {
