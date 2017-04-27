@@ -64,7 +64,22 @@ By default shep builds all your functions using webpack. If your project require
 
 ### Creating a new API
 
-_Coming soon! See [`shep new`](#shep-new)_
+##### 1. Configure AWS
+   Since Shep uses the same credentials as the AWS CLI, all you need to do is configure the cli. This can be accomplished via `aws configure`.
+##### 2. Create a new Shep project
+   Run `shep new my-project`  
+   This will create and configure a Shep project called 'my-project' in the `my-project` directory. Change into this directory.
+##### 3. Create a new endpoint and function
+   Run `shep generate endpoint /hello` and follow the prompts.  
+   This creates a new endpoint as well as a new function for that endpoint. Specifically, it adds a path to `api.json` that is configured to trigger the newly created function.
+##### 4. Deploy
+   Run `shep deploy development`  
+   This command does a couple things in order to deploy your project:  
+  * Uses webpack to build your functions. This is equivalent to running `shep build`.
+  * Creates or updates the Lambda functions associated with your project. This includes creating a new version of the function as well as updating the alias such that `development` will point to the version you just created. For more on versioning please consult Amazon's own [documentation](http://docs.aws.amazon.com/lambda/latest/dg/versioning-aliases.html).
+  * Creates or updates the API Gateway associated with your project and deploys it to the specified stage, `development` in this case.  
+
+   You can test your endpoint by visiting the API URL printed out after the project is deployed. Visiting the `/hello` endpoint which should show `success!`.
 
 ## CLI Documentation
 
