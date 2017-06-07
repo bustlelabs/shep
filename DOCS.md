@@ -191,3 +191,48 @@ Options:
 Examples:
   shep generate webpack -o foo.js  Writes default webpack configuration to foo.js
 ```
+#### `shep config set`
+```
+shep config set <env> <vars...>
+
+Options:
+  --version  Show version number                                                                               [boolean]
+  --help     Show help                                                                                         [boolean]
+
+Examples:
+  shep config set beta FOO=bar  Set environment variable FOO with value BAR for alias beta
+```
+#### `shep config remove`
+```
+shep config remove <env> <vars...>
+
+Options:
+  --version  Show version number                                                                               [boolean]
+  --help     Show help                                                                                         [boolean]
+
+Examples:
+  shep config remove beta NEW_VARIABLE  Removes NEW_VARIABLE from all functions with beta alias
+```
+#### `shep config list`
+```
+shep config list [env] [function]
+
+Options:
+  --version  Show version number                                                                               [boolean]
+  --help     Show help                                                                                         [boolean]
+
+Examples:
+  shep config beta foo  List environment variables for function "foo" beta alias
+```
+#### `shep config dump`
+```
+shep config dump [env]
+
+Options:
+  --version  Show version number                                                                               [boolean]
+  --help     Show help                                                                                         [boolean]
+  --json     Formats output as JSON                                                                            [boolean]
+
+Examples:
+  shep config dump beta  Print to console all environment variables of environment `beta` in JSON format
+```
