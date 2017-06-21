@@ -1,3 +1,6 @@
+import listr from '../util/modules/listr'
+import push from '../push'
+
 export const command = 'push'
 export const desc = 'Create a new shep project'
 export function builder (yargs) {
@@ -14,4 +17,13 @@ export function builder (yargs) {
   .example('shep push --api-id foo --region us-east-1')
 }
 
-export { default as handler } from '../push'
+export function handler (opts) {
+  const tasks = listr([
+    {
+      title: `Upload api.json to AWS`,
+      task: () => push(opts)
+    }
+  ], opts.quiet)
+
+  return tasks.run()
+}

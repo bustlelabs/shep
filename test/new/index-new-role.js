@@ -12,11 +12,12 @@ const templates = td.replace('../../src/new/templates')
 const iam = td.replace('../../src/util/aws/iam')
 td.when(iam.getRole(rolename)).thenReject({ code: 'NoSuchEntity' })
 td.when(iam.createRole(rolename)).thenResolve(roleArn)
+td.when(iam.attachPolicy(), { ignoreExtraArgs: true }).thenResolve()
 td.when(fs.exists(td.matchers.isA(String))).thenResolve(false)
 
 test.before(() => {
   const shep = require('../../src/index')
-  return shep.new({ region, rolename, path, quiet: true })
+  return shep.new({ region, rolename, path })
 })
 
 test('Creates role and writes configured templates', () => {

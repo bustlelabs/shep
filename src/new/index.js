@@ -3,52 +3,47 @@ import { getRole, createRole, attachPolicy } from '../util/aws/iam'
 import * as templates from './templates'
 import Promise from 'bluebird'
 import exec from '../util/modules/exec'
-import listr from '../util/modules/listr'
 
 let conflictingFiles = false
 
-export default async function run ({ path, rolename, region, quiet = true }) {
-  let tasks = [
-    {
-      title: `Setup IAM Role`,
-      task: setupIam
-    },
-    {
-      title: `Create ${path}/`,
-      task: () => mkdirp(path)
-    },
-    {
-      title: 'Create Subdirectories',
-      task: createSubDirs
-    },
-    {
-      title: 'Create Files',
-      task: createFiles
-    },
-    {
-      title: 'Install Depedencies',
-      task: npmInstall
-    }
-  ]
+export default async function run ({ path, rolename, region, logger = () => {} }) {
+  let arn
 
-  if (!rolename) tasks = tasks.splice(1)
+  if (rolename) {
+    logger({ type: 'start', body: `Setup IAM Role` })
+    arn = await setupIam({ rolename })
+  }
 
-  await listr(tasks, quiet).run({ path, rolename, region })
-  if (conflictingFiles) { console.log('Conflicting files were found in provided path. New files were written with .shep-tmp appended to the filename') }
+  logger({ type: 'start', body: `Create ${path}/` })
+  await mkdirp(path)
+
+  logger({ type: 'start', body: 'Create Subdirectories' })
+  await createSubDirs({ path })
+
+  logger({ type: 'start', body: 'Create Files' })
+  await createFiles({ path, arn, region })
+
+  logger({ type: 'start', body: 'Install Depedencies' })
+  await npmInstall({ path })
+
+  logger({ type: 'done' })
+
+  if (conflictingFiles) { logger('Conflicting files were found in provided path. New files were written with .shep-tmp appended to the filename') }
   return path
 }
 
 async function setupIam (context) {
   const rolename = context.rolename
 
+  let arn
   try {
-    context.arn = await getRole(rolename)
-    return context.arn
+    arn = await getRole(rolename)
   } catch (e) {
     if (e.code !== 'NoSuchEntity') { throw e }
-    context.arn = await createRole(rolename)
-    return attachPolicy(rolename)
+    arn = await createRole(rolename)
+    await attachPolicy(rolename)
   }
+  return arn
 }
 
 function createSubDirs ({ path }) {

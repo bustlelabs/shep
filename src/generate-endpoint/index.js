@@ -2,12 +2,11 @@ import generateFunction from '../generate-function'
 import { writeJSON } from '../util/modules/fs'
 import { cors } from './templates'
 import genName from '../util/generate-name'
-import listr from '../util/modules/listr'
 import * as load from '../util/load'
 
 const integration = 'x-amazon-apigateway-integration'
 
-export default async function ({ accountId, path, method, quiet = true }) {
+export default async function ({ accountId, path, method, logger = () => {} }) {
   if (!accountId) {
     throw new Error('Unable to determine your AWS Account ID. Please set it in the `shep` section of package.json')
   }
@@ -17,26 +16,20 @@ export default async function ({ accountId, path, method, quiet = true }) {
   const name = `${path} ${method}`
   const { shortName, fullName } = await genName(name)
 
-  const tasks = listr([
-    {
-      title: `Generate Function ${shortName}`,
-      task: () => generateFunction({ name, quiet: true })
-    },
-    {
-      title: 'Setup Endpoint',
-      task: () => addPath(api, path, method, accountId, fullName)
-    },
-    {
-      title: 'Setup CORS',
-      task: () => setupCORS(api, path)
-    },
-    {
-      title: 'Write api.json',
-      task: () => writeJSON('api.json', api, { spaces: 2 })
-    }
-  ], quiet)
+  logger({ type: 'start', body: `Generate Function ${shortName}` })
+  await generateFunction({ name, quiet: true })
 
-  return tasks.run()
+  logger({ type: 'start', body: 'Setup Endpoint' })
+  addPath(api, path, method, accountId, fullName)
+
+  logger({ type: 'start', body: 'Setup CORS' })
+  setupCORS(api, path)
+
+  logger({ type: 'start', body: 'Write api.json' })
+  await writeJSON('api.json', api, { spaces: 2 })
+
+  logger({ type: 'done' })
+  return path
 }
 
 function addPath (api, path, method, accountId, functionName) {

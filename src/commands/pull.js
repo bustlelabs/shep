@@ -1,3 +1,6 @@
+import pull from '../pull'
+import reporter from '../util/reporter'
+
 export const command = 'pull'
 export const desc = 'Pulls a swagger JSON representation of an existing API and writes it to a local file'
 export function builder (yargs) {
@@ -24,4 +27,7 @@ export function builder (yargs) {
   .example('shep pull --output other-path.json', 'Writes the JSON swagger file to `other-path.json`')
 }
 
-export { default as handler } from '../pull'
+export function handler (opts) {
+  if (!opts.quiet) { opts.logger = reporter() }
+  return pull(opts)
+}

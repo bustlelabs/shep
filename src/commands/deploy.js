@@ -1,6 +1,7 @@
 import inquirer from 'inquirer'
 import deploy from '../deploy'
 import * as load from '../util/load'
+import reporter from '../util/reporter'
 import merge from 'lodash.merge'
 
 export const command = 'deploy'
@@ -26,6 +27,12 @@ export function builder (yargs) {
 export async function handler (opts) {
   const envs = await load.envs()
 
+  if (!opts.env && !(envs && envs.length !== 0)) {
+    throw new Error('No environments found, use the --env flag to create a new one')
+  }
+
+  const deployArgs = merge({}, opts)
+  if (!opts.quiet) { deployArgs.logger = reporter() }
   if (envs && envs.length > 0) {
     const questions = [
       {
@@ -36,10 +43,9 @@ export async function handler (opts) {
       }
     ]
 
-    inquirer.prompt(questions.filter((q) => !opts[q.name]))
-    .then((inputs) => merge({}, inputs, opts))
-    .then(deploy)
-  } else {
-    if (!opts.env) { console.log('No environments found, use the --env flag to create a new one') }
+    const inputs = await inquirer.prompt(questions.filter((q) => !opts[q.name]))
+    merge(deployArgs, inputs)
   }
+
+  return deploy(deployArgs)
 }

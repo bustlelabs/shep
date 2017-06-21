@@ -1,6 +1,7 @@
 import inquirer from 'inquirer'
-import generateEndpoint from '../../generate-endpoint'
 import merge from 'lodash.merge'
+import reporter from '../../util/reporter'
+import generateEndpoint from '../../generate-endpoint'
 
 const httpMethods = ['get', 'post', 'put', 'delete', 'options', 'any']
 
@@ -16,7 +17,7 @@ export function builder (yargs) {
   .alias('q', 'quiet')
 }
 
-export function handler (opts) {
+export async function handler (opts) {
   const questions = [
     {
       name: 'path',
@@ -33,7 +34,7 @@ export function handler (opts) {
     }
   ]
 
-  inquirer.prompt(questions.filter((q) => !opts[q.name]))
-  .then((inputs) => merge({}, inputs, opts))
-  .then(generateEndpoint)
+  if (!opts.quiet) { opts.logger = reporter() }
+  const inputs = await inquirer.prompt(questions.filter((q) => !opts[q.name]))
+  return generateEndpoint(merge({}, inputs, opts))
 }

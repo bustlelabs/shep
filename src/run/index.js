@@ -15,10 +15,11 @@ const results = { success: 'SUCCESS', error: 'ERROR', exception: 'EXCEPTION' }
 const awsNodeVersion = ['4.3.2', '6.10.2']
 
 export default async function (opts) {
+  const logger = opts.logger || (() => {})
   const processVersion = process.versions.node
 
   if (awsNodeVersion.indexOf(processVersion) === -1) {
-    console.log(`Warning: Lambda currently runs node v${awsNodeVersion} but you are using v${processVersion}`)
+    logger(`Warning: Lambda currently runs node v${awsNodeVersion} but you are using v${processVersion}`)
   }
 
   const loggingFunction = logFunction(opts.t)
@@ -27,15 +28,13 @@ export default async function (opts) {
 
   const out = await Promise.map(names, funcRunner)
   out.map(loggingFunction)
-  console.log(ui.toString())
+  const output = ui.toString()
 
-  const failedFunctions = out.reduce((count, eventResponse) => {
+  const numberOfFailed = out.reduce((count, eventResponse) => {
     return count + eventResponse.filter((e) => e.error).length
   }, 0)
 
-  if (failedFunctions > 0) {
-    process.exit(failedFunctions)
-  }
+  return { output, numberOfFailed }
 }
 
 function runFunction (opts) {

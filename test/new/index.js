@@ -5,12 +5,14 @@ import { didExec } from '../helpers/exec'
 
 const path = 'foo-api'
 const iam = td.replace('../../src/util/aws/iam')
+td.when(iam.getRole(), { ignoreExtraArgs: true }).thenResolve()
+td.when(iam.createRole(), { ignoreExtraArgs: true }).thenResolve()
 
 td.when(fs.exists(td.matchers.isA(String))).thenResolve(false)
 
 test.before(() => {
   const shep = require('../../src/index')
-  return shep.new({ path, quiet: true })
+  return shep.new({ path })
 })
 
 test('No calls to AWS if no rolename', () => {

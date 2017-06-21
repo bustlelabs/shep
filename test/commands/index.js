@@ -81,7 +81,8 @@ const pushArgs = {
 
 test([allFlags], 'push', pushParser, pushArgs)
 
-td.replace('../../src/run')
+const run = td.replace('../../src/run')
+td.when(run(), { ignoreExtraArgs: true }).thenResolve({ output: '', numberOfFailed: 0 })
 const runParser = yargs.command(require('../../src/commands/run'))
 const runArgs = {
   pattern: '\'*\'',

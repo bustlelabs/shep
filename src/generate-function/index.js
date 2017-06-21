@@ -1,28 +1,22 @@
 import { mkdirp, writeFile } from '../util/modules/fs'
 import genName from '../util/generate-name'
 import * as templates from './templates'
-import listr from '../util/modules/listr'
 import Promise from 'bluebird'
 
-export default async function ({ name, quiet = true }) {
+export default async function ({ name, logger = () => {} }) {
   const { shortName, fullName } = await genName(name)
 
-  const tasks = listr([
-    {
-      title: `Create functions/${shortName}/`,
-      task: () => mkdirp(`./functions/${shortName}`)
-    },
-    {
-      title: `Create functions/${shortName}/events`,
-      task: () => mkdirp(`./functions/${shortName}/events`)
-    },
-    {
-      title: 'Create files',
-      task: () => createFiles(shortName)
-    }
-  ], quiet)
+  logger({ type: 'start', body: `Create functions/${shortName}/` })
+  await mkdirp(`./functions/${shortName}`)
 
-  return tasks.run()
+  logger({ type: 'start', body: `Create functions/${shortName}/events` })
+  await mkdirp(`./functions/${shortName}/events`)
+
+  logger({ type: 'start', body: 'Create files' })
+  await createFiles(shortName)
+
+  logger({ type: 'done' })
+  return fullName
 
   function createFiles () {
     return Promise.all([

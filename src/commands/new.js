@@ -1,6 +1,7 @@
-import _new from '../new'
 import inquirer from 'inquirer'
 import merge from 'lodash.merge'
+import reporter from '../util/reporter'
+import _new from '../new'
 
 const questions = [
   {
@@ -41,8 +42,8 @@ export function builder (yargs) {
   .example('shep new my-api', 'Generates a project at `my-api`')
 }
 
-export function handler (opts) {
-  inquirer.prompt(questions.filter((q) => !opts[q.name] && (!opts.skipConfig || !q.config)))
-  .then((inputs) => merge({}, inputs, opts))
-  .then(_new)
+export async function handler (opts) {
+  const inputs = await inquirer.prompt(questions.filter((q) => !opts[q.name] && (!opts.skipConfig || !q.config)))
+  if (!opts.quiet) { opts.logger = reporter() }
+  return _new(merge({}, inputs, opts))
 }

@@ -32,7 +32,11 @@ export async function handler (opts) {
     }
   ]
 
-  inquirer.prompt(questions.filter((q) => !opts[q.name]))
-  .then((inputs) => merge({}, inputs, opts))
-  .then(run)
+  const inputs = await inquirer.prompt(questions.filter((q) => !opts[q.name]))
+  const { output, numberOfFailed } = await run(merge({ logger: console.log }, inputs, opts))
+  console.log(output)
+
+  if (numberOfFailed > 0) {
+    process.exit(numberOfFailed)
+  }
 }
