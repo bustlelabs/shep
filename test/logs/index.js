@@ -31,5 +31,5 @@ td.when(getLogs(td.matchers.isA(Object))).thenResolve(getLogResponse)
 test('Continues loop', async (t) => {
   const shep = require('../../src/index')
   await t.throws(shep.logs({ stage, name: functionName, stream: true }))
-  td.verify(callback())
+  td.verify(callback(td.matchers.isA(Number)))
 })

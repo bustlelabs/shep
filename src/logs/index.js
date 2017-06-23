@@ -4,21 +4,20 @@ import { getAliasVersion } from '../util/aws/lambda'
 import getLogs from '../util/get-logs'
 import { lambdaConfig } from '../util/load'
 
-export default async function (opts) {
-  const { FunctionName } = await lambdaConfig(opts.name)
-  const aliasName = opts.env
-  const stream = opts.stream
+export default async function ({ name, env, time = Infinity, logger = () => {} }) {
+  const { FunctionName } = await lambdaConfig(name)
+  const aliasName = env
 
   const [logGroupName, functionVersion] = await Promise.all([getLogGroup({ FunctionName }), getAliasVersion({ functionName: FunctionName, aliasName })])
-  const logs = await getLogs({ logGroupName, functionVersion, stream })
+  const logs = await getLogs({ logGroupName, functionVersion, timeLeft: time, logger })
   return printEventsLoop(logs)
 }
 
-async function printEventsLoop ({ events, nextLogCall }) {
-  const rate = 500
+async function printEventsLoop ({ events, logger, nextLogCall }) {
+  const rate = 1000
 
   if (events !== undefined && events.length !== 0) {
-    console.log(events.map(formatEvent).join(''))
+    logger(events.map(formatEvent).join(''))
   }
 
   if (nextLogCall === undefined) {
@@ -26,7 +25,7 @@ async function printEventsLoop ({ events, nextLogCall }) {
   }
 
   await Promise.delay(rate)
-  const logs = await nextLogCall()
+  const logs = await nextLogCall(rate)
   return printEventsLoop(logs)
 }
 

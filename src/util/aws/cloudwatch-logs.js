@@ -32,7 +32,7 @@ export async function getLogStreams ({ logGroupName, functionVersion }) {
   }
 
   const logStreams = await cwLogs.describeLogStreams(params).promise().get('logStreams')
-  return logStreams.map(({ logStreamName }) => logStreamName).filter(versionRegExp.test)
+  return logStreams.map(({ logStreamName }) => logStreamName).filter(versionRegExp.test.bind(versionRegExp))
 }
 
 export async function getLogEvents ({ logGroupName, logStreamNames, start, end }) {
