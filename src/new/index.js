@@ -9,23 +9,27 @@ let conflictingFiles = false
 export default async function run ({ path, rolename, region, logger = () => {} }) {
   let arn
 
-  if (rolename) {
-    logger({ type: 'start', body: `Setup IAM Role` })
-    arn = await setupIam({ rolename })
+  try {
+    if (rolename) {
+      logger({ type: 'start', body: `Setup IAM Role` })
+      arn = await setupIam({ rolename })
+    }
+
+    logger({ type: 'start', body: `Create ${path}/` })
+    await mkdirp(path)
+
+    logger({ type: 'start', body: 'Create Subdirectories' })
+    await createSubDirs({ path })
+
+    logger({ type: 'start', body: 'Create Files' })
+    await createFiles({ path, arn, region })
+
+    logger({ type: 'start', body: 'Install Depedencies' })
+    await npmInstall({ path })
+  } catch (e) {
+    logger({ type: 'fail', body: e })
+    throw e
   }
-
-  logger({ type: 'start', body: `Create ${path}/` })
-  await mkdirp(path)
-
-  logger({ type: 'start', body: 'Create Subdirectories' })
-  await createSubDirs({ path })
-
-  logger({ type: 'start', body: 'Create Files' })
-  await createFiles({ path, arn, region })
-
-  logger({ type: 'start', body: 'Install Depedencies' })
-  await npmInstall({ path })
-
   logger({ type: 'done' })
 
   if (conflictingFiles) { logger('Conflicting files were found in provided path. New files were written with .shep-tmp appended to the filename') }

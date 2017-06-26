@@ -22,7 +22,8 @@ const newArgs = {
 
 test([allFlags, noFlags], 'new', newParser, newArgs)
 
-td.replace('../../src/build')
+const build = td.replace('../../src/build')
+td.when(build(), { ignoreExtraArgs: true }).thenResolve()
 const buildParser = yargs.command(require('../../src/commands/build'))
 
 const buildArgs = {
@@ -72,7 +73,8 @@ const pullArgs = {
 
 test([allFlags], 'pull', pullParser, pullArgs)
 
-td.replace('../../src/push')
+const push = td.replace('../../src/push')
+td.when(push(), { ignoreExtraArgs: true }).thenResolve()
 const pushParser = yargs.command(require('../../src/commands/push'))
 const pushArgs = {
   'api-id': 12345,
@@ -118,7 +120,8 @@ const webpackArgs = {
 
 test([allFlags, noFlags], 'webpack', webpackParser, webpackArgs)
 
-td.replace('../../src/config-remove')
+const configRemove = td.replace('../../src/config-remove')
+td.when(configRemove(), { ignoreExtraArgs: true }).thenResolve()
 const removeParser = yargs.command(require('../../src/commands/config/remove'))
 
 test('config remove command', (t) => {
@@ -127,7 +130,8 @@ test('config remove command', (t) => {
   })
 })
 
-td.replace('../../src/config-set')
+const configSet = td.replace('../../src/config-set')
+td.when(configSet(), { ignoreExtraArgs: true }).thenResolve()
 const setParser = yargs.command(require('../../src/commands/config/set'))
 
 test('config set command', (t) => {

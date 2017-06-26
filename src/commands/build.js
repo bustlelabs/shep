@@ -1,4 +1,4 @@
-import listr from '../util/modules/listr'
+import reporter from '../util/reporter'
 import build from '../build'
 
 export const command = 'build'
@@ -13,13 +13,14 @@ export function builder (yargs) {
   .example('shep build --functions \'*-user\'', 'Build functions matching the pattern *-user')
 }
 
-export function handler (opts) {
-  const tasks = listr([
-    {
-      title: `Build Functions`,
-      task: () => build(opts)
-    }
-  ], opts.quiet)
-
-  return tasks.run()
+export async function handler (opts) {
+  const logger = opts.quiet ? () => {} : reporter()
+  logger({ type: 'start', body: `Build Functions` })
+  try {
+    await build(opts)
+  } catch (e) {
+    logger({ type: 'fail', body: e })
+    throw e
+  }
+  logger({ type: 'done' })
 }

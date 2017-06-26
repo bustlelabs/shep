@@ -1,4 +1,5 @@
-import listr from '../../util/modules/listr'
+import Promise from 'bluebird'
+import reporter from '../../util/reporter'
 import getAllFunctionAliases from '../../util/get-all-function-aliases'
 import sync from '../../config-sync'
 
@@ -17,6 +18,7 @@ export function builder (yargs) {
 }
 
 export async function handler (opts) {
+  const logger = opts.quiet ? () => {} : reporter()
   const aliases = new Set()
   if (opts.env === undefined) {
     const allFuncAliases = await getAllFunctionAliases()
@@ -28,12 +30,14 @@ export async function handler (opts) {
     aliases.add(opts.env)
   }
 
-  const tasks = listr([...aliases].map((alias) => {
-    return {
-      title: `Syncing ${alias} environment across all functions`,
-      task: () => sync({ env: alias })
+  await Promise.each([...aliases], async (alias) => {
+    try {
+      logger({ type: 'start', body: `Syncing ${alias} environment across all functions` })
+      await sync({ env: alias })
+    } catch (e) {
+      logger({ type: 'fail', body: e })
+      throw e
     }
-  }), opts.quiet)
-
-  return tasks.run()
+  })
+  logger({ type: 'done' })
 }

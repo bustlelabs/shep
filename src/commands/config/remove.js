@@ -1,7 +1,7 @@
 import inquirer from 'inquirer'
 import configRemove from '../../config-remove'
 import * as load from '../../util/load'
-import listr from '../../util/modules/listr'
+import reporter from '../../util/reporter'
 import merge from 'lodash.merge'
 
 export const command = 'remove <vars...>'
@@ -17,6 +17,7 @@ export function builder (yargs) {
 }
 
 export async function handler (opts) {
+  const logger = opts.quiet ? () => {} : reporter()
   const inputs = {}
 
   if (!opts.env) {
@@ -34,13 +35,12 @@ export async function handler (opts) {
     merge(inputs, await inquirer.prompt(questions.filter((q) => !opts[q.name])))
   }
 
-  const tasks = listr([
-    {
-      title: 'Remove environment variables on functions in AWS',
-      task: () => configRemove(merge({}, inputs, opts))
-    }
-  ], opts.quiet)
-
-  await tasks.run()
-  console.log(`Removed ${opts.vars.join(', ')} from ${inputs.env}`)
+  logger({ type: 'start', body: 'Remove environment variables on functions in AWS' })
+  try {
+    await configRemove(merge({}, inputs, opts))
+  } catch (e) {
+    logger({ type: 'fail', body: e })
+    throw e
+  }
+  logger({ type: 'done', body: `Removed ${opts.vars.join(', ')} from ${inputs.env}` })
 }

@@ -1,4 +1,4 @@
-import listr from '../util/modules/listr'
+import reporter from '../util/reporter'
 import push from '../push'
 
 export const command = 'push'
@@ -17,13 +17,14 @@ export function builder (yargs) {
   .example('shep push --api-id foo --region us-east-1')
 }
 
-export function handler (opts) {
-  const tasks = listr([
-    {
-      title: `Upload api.json to AWS`,
-      task: () => push(opts)
-    }
-  ], opts.quiet)
-
-  return tasks.run()
+export async function handler (opts) {
+  const logger = opts.quiet ? () => {} : reporter()
+  logger({ type: 'start', body: `Upload api.json to AWS` })
+  try {
+    await push(opts)
+  } catch (e) {
+    logger({ type: 'fail', body: e })
+    throw e
+  }
+  logger({ type: 'done' })
 }

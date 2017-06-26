@@ -15,7 +15,7 @@ export default function () {
   const fail = (body) => {
     const cur = spinners.pop()
     if (cur !== undefined) {
-      cur.fail()
+      cur.fail(body)
     }
   }
 

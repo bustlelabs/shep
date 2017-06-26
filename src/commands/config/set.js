@@ -1,5 +1,5 @@
 import inquirer from 'inquirer'
-import listr from '../../util/modules/listr'
+import reporter from '../../util/reporter'
 import configSet from '../../config-set'
 import * as load from '../../util/load'
 import merge from 'lodash.merge'
@@ -16,6 +16,7 @@ export function builder (yargs) {
 }
 
 export async function handler (opts) {
+  const logger = opts.quiet ? () => {} : reporter()
   let envVars = {}
   opts.vars.forEach(function (varPair) {
     const [key, value] = varPair.match(/(.*?)=(.*)/).slice(1)
@@ -38,10 +39,12 @@ export async function handler (opts) {
     merge(inputs, await inquirer.prompt(questions))
   }
 
-  return listr([
-    {
-      title: 'Set environment variables on functions in AWS',
-      task: () => configSet(merge({}, inputs, opts))
-    }
-  ], opts.quiet).run()
+  logger({ type: 'start', body: 'Set environment variables on functions in AWS' })
+  try {
+    await configSet(merge({}, inputs, opts))
+  } catch (e) {
+    logger({ type: 'fail', body: e })
+    throw e
+  }
+  logger({ type: 'done' })
 }

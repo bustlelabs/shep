@@ -218,7 +218,7 @@ Options:
   --help     Show help                                                                                         [boolean]
   --env      Specifies which environment to use. If not provided an interactive menu will display the options.
   --name     Name of function to use
-  --stream   Stream logs                                                                       [boolean] [default: true]
+  --time     Time in seconds that logs should be streamed                                            [default: Infinity]
 
 Examples:
   shep logs                       Launch an interactive CLI
