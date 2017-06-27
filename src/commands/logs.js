@@ -17,20 +17,19 @@ export function builder (yargs) {
 }
 
 export async function handler (opts) {
-  const envs = await load.envs()
   const fns = await load.funcs()
   const questions = []
 
-  if (envs && envs.length > 0) {
+  if (!opts.env) {
+    const envs = await load.envs()
     questions.push({
       name: 'env',
       message: 'Environment',
       type: 'list',
       choices: () => envs
     })
-  } else if (!opts.env) {
-    throw new Error('No aliases found, please deploy your functions before trying to look at their logs')
   }
+
   questions.push({
     name: 'name',
     message: 'Function',

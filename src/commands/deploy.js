@@ -25,15 +25,10 @@ export function builder (yargs) {
 }
 
 export async function handler (opts) {
-  const envs = await load.envs()
-
-  if (!opts.env && !(envs && envs.length !== 0)) {
-    throw new Error('No environments found, use the --env flag to create a new one')
-  }
-
-  const deployArgs = merge({}, opts)
+  const deployArgs = {}
   if (!opts.quiet) { deployArgs.logger = reporter() }
-  if (envs && envs.length > 0) {
+  if (!opts.env) {
+    const envs = await load.envs()
     const questions = [
       {
         name: 'env',
@@ -47,5 +42,5 @@ export async function handler (opts) {
     merge(deployArgs, inputs)
   }
 
-  return deploy(deployArgs)
+  return deploy(merge({}, deployArgs, opts))
 }

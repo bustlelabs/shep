@@ -22,7 +22,6 @@ export async function handler (opts) {
 
   if (!opts.env) {
     const envs = await load.envs()
-    if (envs && envs.length === 0) { throw new Error('Unable to load environments, please provide a specific one via the --env flag') }
     const questions = [
       {
         name: 'env',
@@ -39,7 +38,7 @@ export async function handler (opts) {
   try {
     await configRemove(merge({}, inputs, opts))
   } catch (e) {
-    logger({ type: 'fail', body: e })
+    logger({ type: 'fail' })
     throw e
   }
   logger({ type: 'done', body: `Removed ${opts.vars.join(', ')} from ${inputs.env}` })

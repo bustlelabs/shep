@@ -1,4 +1,5 @@
 import { readdir, readJSON } from './modules/fs'
+import { MissingShepConfiguration } from './errors'
 import minimatch from 'minimatch'
 import { listAliases, isFunctionDeployed } from './aws/lambda'
 import Promise from 'bluebird'
@@ -10,18 +11,20 @@ export async function envs () {
   const deployedFunctions = await Promise.filter(fullFuncNames, isFunctionDeployed)
   const allAliases = await Promise.map(deployedFunctions, (name) => listAliases(name).map(({ Name }) => Name))
 
-  return allAliases.reduce((acc, aliasSet) => {
+  const aliases = allAliases.reduce((acc, aliasSet) => {
     const missingAliases = aliasSet.filter((alias) => acc.indexOf(alias) === -1)
           .concat(acc.filter((alias) => aliasSet.indexOf(alias) === -1))
 
     if (missingAliases.length !== 0) {
-      const err = new Error('Mismatched aliases found, please run `shep config sync` to ensure all functions have the same environment')
-      err.name = 'EnvironmentMistmach'
-      throw err
+      throw new EnvironmentMismatch()
     }
 
     return acc
   }, allAliases.pop())
+
+  if (aliases.length === 0) { throw new AliasesNotFound() }
+
+  return aliases
 }
 
 export async function events (func, eventName) {
@@ -30,7 +33,7 @@ export async function events (func, eventName) {
   if (eventName) {
     events = events.filter((event) => event === `${eventName}.json`)
     if (events.length === 0) {
-      throw new Error(`No event in '${eventDir}' called ${eventName}`)
+      throw new EventNotFound({ eventDir, eventName })
     }
   }
 
@@ -40,7 +43,7 @@ export async function events (func, eventName) {
 export async function funcs (pattern = '*') {
   const funcs = await readdir('functions').filter(minimatch.filter(pattern))
   if (funcs.length === 0) {
-    throw new Error(`No functions found matching patterns: ${JSON.stringify(funcs)}`)
+    throw new FunctionNotFound(pattern)
   } else {
     return funcs
   }
@@ -55,7 +58,7 @@ export async function lambdaConfig (name) {
 
 export async function pkg () {
   const pkg = await readJSON('package.json')
-  if (!pkg || !pkg.shep) { throw new Error('Missing shep section in package.json') }
+  if (!pkg || !pkg.shep) { throw new MissingShepConfiguration() }
   return pkg
 }
 
@@ -70,4 +73,38 @@ export async function api () {
 
 export function babelrc () {
   return readJSON('.babelrc')
+}
+
+export class EnvironmentMismatch extends Error {
+  constructor () {
+    super()
+    this.message = 'Mismatched aliases found, please run `shep config sync` to ensure all functions have the same environment'
+    this.name = 'EnvironmentMismatch'
+  }
+}
+
+export class EventNotFound extends Error {
+  constructor ({ eventDir, eventName }) {
+    const message = `No event in '${eventDir}' called ${eventName}`
+    super(message)
+    this.message = message
+    this.name = 'EventNotFound'
+  }
+}
+
+export class FunctionNotFound extends Error {
+  constructor (pattern) {
+    const message = `No functions found matching patterns: ${JSON.stringify(pattern)}`
+    super(message)
+    this.message = message
+    this.name = 'FunctionNotFound'
+  }
+}
+
+export class AliasesNotFound extends Error {
+  constructor () {
+    super()
+    this.message = 'Cannot load available aliases, to create an alias use `shep deploy --env beta`'
+    this.name = 'AliasesNotFound'
+  }
 }

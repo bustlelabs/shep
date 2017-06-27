@@ -1,4 +1,5 @@
 import generateFunction from '../generate-function'
+import { MissingShepConfiguration, DuplicateEndpointError } from '../util/errors'
 import { writeJSON } from '../util/modules/fs'
 import { cors } from './templates'
 import genName from '../util/generate-name'
@@ -8,7 +9,7 @@ const integration = 'x-amazon-apigateway-integration'
 
 export default async function ({ accountId, path, method, logger = () => {} }) {
   if (!accountId) {
-    throw new Error('Unable to determine your AWS Account ID. Please set it in the `shep` section of package.json')
+    throw new MissingShepConfiguration('Unable to determine your AWS Account ID. Please set it in the `shep` section of package.json')
   }
 
   const api = await load.api() || {}
@@ -16,17 +17,22 @@ export default async function ({ accountId, path, method, logger = () => {} }) {
   const name = `${path} ${method}`
   const { shortName, fullName } = await genName(name)
 
-  logger({ type: 'start', body: `Generate Function ${shortName}` })
-  await generateFunction({ name, quiet: true })
+  try {
+    logger({ type: 'start', body: `Generate Function ${shortName}` })
+    await generateFunction({ name, quiet: true })
 
-  logger({ type: 'start', body: 'Setup Endpoint' })
-  addPath(api, path, method, accountId, fullName)
+    logger({ type: 'start', body: 'Setup Endpoint' })
+    addPath(api, path, method, accountId, fullName)
 
-  logger({ type: 'start', body: 'Setup CORS' })
-  setupCORS(api, path)
+    logger({ type: 'start', body: 'Setup CORS' })
+    setupCORS(api, path)
 
-  logger({ type: 'start', body: 'Write api.json' })
-  await writeJSON('api.json', api, { spaces: 2 })
+    logger({ type: 'start', body: 'Write api.json' })
+    await writeJSON('api.json', api, { spaces: 2 })
+  } catch (e) {
+    logger({ type: 'fail' })
+    throw e
+  }
 
   logger({ type: 'done' })
   return path
@@ -40,7 +46,7 @@ function addPath (api, path, method, accountId, functionName) {
   }
 
   api.paths[path] = api.paths[path] || {}
-  if (api.paths[path][method] !== undefined) { throw new Error(`Method '${method}' on path '${path}' already exists`) }
+  if (api.paths[path][method] !== undefined) { throw new DuplicateEndpointError(method, path) }
   api.paths[path][method] = api.paths[path][method] || {}
   api.paths[path][method][integration] = {
     uri: `arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:${accountId}:function:${functionName}:\${stageVariables.functionAlias}/invocations`,

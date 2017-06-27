@@ -35,7 +35,7 @@ export async function handler (opts) {
       logger({ type: 'start', body: `Syncing ${alias} environment across all functions` })
       await sync({ env: alias })
     } catch (e) {
-      logger({ type: 'fail', body: e })
+      logger({ type: 'fail' })
       throw e
     }
   })

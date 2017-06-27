@@ -30,7 +30,7 @@ export async function deploy (id, env, attempts = 1) {
     return deployment
   } catch (e) {
     if (e.code !== 'TooManyRequestsException') { throw e }
-    if (!e.retryable && attempts > DEPLOY_ATTEMPT_MAX) { throw new Error('Amazon limit hit') }
+    if (!e.retryable && attempts > DEPLOY_ATTEMPT_MAX) { throw new AWSLimitError() }
     await Promise.delay(e.retryDelay * 1000)
     return deploy(id, env, attempts++)
   }
@@ -63,4 +63,13 @@ export async function aliases (id) {
   }
 
   return apiGateway.getStages(params).promise().get('item').map((x) => x.stageName)
+}
+
+export class AWSLimitError extends Error {
+  constructor () {
+    const msg = `Amazon limit and retry limit of ${DEPLOY_ATTEMPT_MAX} hit`
+    super(msg)
+    this.message = msg
+    this.name = 'AWSLimitError'
+  }
 }

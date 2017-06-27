@@ -63,7 +63,7 @@ export default async function ({ apiId, functions = '*', env = 'development', re
       logger({ type: 'skip', body: 'No API' })
     }
   } catch (e) {
-    logger({ type: 'fail', body: e })
+    logger({ type: 'fail' })
     throw e
   }
 

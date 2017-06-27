@@ -1,4 +1,5 @@
 import Promise from 'bluebird'
+import { EnvironmentVariableConflict } from '../util/errors'
 import { environmentCheck, values } from '../util/environment-check'
 import getFunctionEnvs from '../util/get-function-envs'
 import uploadEnvironment from '../util/upload-environment'
@@ -10,9 +11,8 @@ export default async function ({ env }) {
   const { common, differences, conflicts } = environmentCheck(environments)
 
   if (Object.keys(conflicts).length !== 0) {
-    const conflictVars = Object.keys(conflicts)
-    const errMessage = `${conflictVars.join(', ')} have conflicting values. Fix this by using 'shep config set ${env}'`
-    throw new Error(errMessage)
+    const conflictVars = values(conflicts)
+    throw new EnvironmentVariableConflict({ conflictVars, env })
   }
 
   const combinedEnvironment = values(differences).reduce((acc, { key, value }) => {

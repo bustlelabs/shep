@@ -17,7 +17,7 @@ export default async function ({ apiId, stage, region, output = 'api.json', logg
     logger({ type: 'done' })
     return exportedApi
   } catch (e) {
-    logger({ type: 'fail', body: e })
+    logger({ type: 'fail' })
     throw e
   }
 }

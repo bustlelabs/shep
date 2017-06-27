@@ -1,5 +1,6 @@
 import * as load from '../util/load'
 import Promise from 'bluebird'
+import { EnvironmentsOutOfSync } from '../util/errors'
 import { isFunctionDeployed } from '../util/aws/lambda'
 import getFunctionEnvs from '../util/get-function-envs'
 import { environmentCheck } from '../util/environment-check'
@@ -10,7 +11,7 @@ export default async function ({ env, quiet = true, json }) {
   const { common, differences, conflicts } = environmentCheck(envs)
 
   if (json && Object.keys(conflicts).concat(Object.keys(differences)).length !== 0) {
-    throw new Error('Environments are out of sync, run `shep config sync` to fix')
+    throw new EnvironmentsOutOfSync()
   }
   return { common, differences, conflicts }
 }

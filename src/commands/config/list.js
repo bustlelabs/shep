@@ -29,10 +29,6 @@ export async function handler (opts) {
     }
   ]
 
-  if (envs && envs.length === 0 && !opts.env) {
-    throw new Error('Cannot load available aliases, to create an alias use `shep deploy --env beta`')
-  }
-
   const inputs = await inquirer.prompt(questions.filter((q) => !opts[q.name]))
   const { common, differences, conflicts } = await configList(merge({}, inputs, opts))
 

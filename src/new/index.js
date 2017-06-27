@@ -27,7 +27,7 @@ export default async function run ({ path, rolename, region, logger = () => {} }
     logger({ type: 'start', body: 'Install Depedencies' })
     await npmInstall({ path })
   } catch (e) {
-    logger({ type: 'fail', body: e })
+    logger({ type: 'fail' })
     throw e
   }
   logger({ type: 'done' })

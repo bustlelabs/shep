@@ -15,7 +15,7 @@ export async function getLogGroup ({ FunctionName }) {
     const matchedGroups = groups.filter((logGroup) => logGroup.logGroupName === expetedName)
     return matchedGroups.pop().logGroupName
   } catch (e) {
-    throw new Error('No log groups found for specified function')
+    throw new AWSLogGroupNotFound(FunctionName)
   }
 }
 
@@ -49,4 +49,13 @@ export async function getLogEvents ({ logGroupName, logStreamNames, start, end }
 
   return cwLogs.filterLogEvents(params).promise()
   .get('events')
+}
+
+export class AWSLogGroupNotFound extends Error {
+  constructor (functionName) {
+    const msg = `No log groups found for ${functionName}`
+    super(msg)
+    this.message = msg
+    this.name = 'LogGroupNotFound'
+  }
 }

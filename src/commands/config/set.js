@@ -43,7 +43,7 @@ export async function handler (opts) {
   try {
     await configSet(merge({}, inputs, opts))
   } catch (e) {
-    logger({ type: 'fail', body: e })
+    logger({ type: 'fail' })
     throw e
   }
   logger({ type: 'done' })

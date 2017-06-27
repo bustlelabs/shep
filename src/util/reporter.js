@@ -2,34 +2,29 @@ import ora from 'ora'
 import chalk from 'chalk'
 
 export default function () {
-  const spinners = []
+  let cur
 
-  const start = (body) => {
-    const cur = spinners.pop()
+  const done = (body) => {
     if (cur !== undefined) {
       cur.succeed()
+      cur = undefined
     }
-    spinners.push(ora({ text: body, color: 'gray' }).start())
+  }
+
+  const start = (body) => {
+    done()
+    cur = ora({ text: body, color: 'gray' }).start()
   }
 
   const fail = (body) => {
-    const cur = spinners.pop()
     if (cur !== undefined) {
       cur.fail(body)
     }
-  }
-
-  const done = (body) => {
-    spinners.forEach((s) => {
-      s.succeed()
-    })
+    cur = undefined
   }
 
   const skip = (body) => {
-    const cur = spinners.pop()
-    if (cur !== undefined) {
-      cur.succeed()
-    }
+    done()
     ora(body).stopAndPersist({ text: body, symbol: chalk.yellow('→') })
   }
 

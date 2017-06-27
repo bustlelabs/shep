@@ -1,5 +1,5 @@
 import AWS from './'
-import loadRegion from '../aws/region-loader'
+import loadRegion from './region-loader'
 import merge from 'lodash.merge'
 
 export async function getFunction (params) {
@@ -16,7 +16,7 @@ export async function isFunctionDeployed (FunctionName) {
     await getFunction({ FunctionName })
     return true
   } catch (e) {
-    if (e.code !== 'ResourceNotFoundException') { throw new Error(e) }
+    if (e.code !== 'ResourceNotFoundException') { throw e }
     return false
   }
 }
@@ -102,7 +102,7 @@ export async function getEnvironment (env, { FunctionName }) {
     return envVars
   } catch (e) {
     if (e.code !== 'ResourceNotFoundException') { throw e }
-    throw new Error(`No environment variables exist for ${FunctionName}`)
+    throw new AWSEnvironmentVariableNotFound(FunctionName)
   }
 }
 
@@ -182,7 +182,7 @@ export async function listAliases (functionName) {
 
 function validateConfig (config) {
   if (!config.Role) {
-    throw new Error('You need to specify a valid Role for your lambda functions. See the shep README for details.')
+    throw new AWSInvalidLambdaConfiguration()
   }
 }
 
@@ -199,8 +199,26 @@ function deleteEnvVars (awsFunction, envVars) {
     try {
       delete awsFunction.Configuration.Environment.Variables[envVar]
     } catch (e) {
-      throw new Error(`Variable ${envVar} does not exist on AWS`)
+      throw new AWSEnvironmentVariableNotFound(awsFunction.FunctionName, envVar)
     }
   })
   return awsFunction.Configuration.Environment.Variables
+}
+
+export class AWSEnvironmentVariableNotFound extends Error {
+  constructor (functionName, envVar) {
+    const msg = `Variable${envVar ? ' ' + envVar : 's'} not found for ${functionName}`
+    super(msg)
+    this.message = msg
+    this.name = 'AWSEnvironmentVariableNotFound'
+  }
+}
+
+export class AWSInvalidLambdaConfiguration extends Error {
+  constructor () {
+    const msg = 'You need to specify a valid Role for your lambda functions. See the shep README for details.'
+    super(msg)
+    this.message = msg
+    this.name = 'AWSInvalidLambdaConfiguration'
+  }
 }
