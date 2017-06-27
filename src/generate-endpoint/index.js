@@ -1,9 +1,10 @@
 import generateFunction from '../generate-function'
-import { MissingShepConfiguration, DuplicateEndpointError } from '../util/errors'
+import { DuplicateEndpointError } from '../util/errors'
 import { writeJSON } from '../util/modules/fs'
 import { cors } from './templates'
 import genName from '../util/generate-name'
 import * as load from '../util/load'
+const { MissingShepConfiguration } = load
 
 const integration = 'x-amazon-apigateway-integration'
 

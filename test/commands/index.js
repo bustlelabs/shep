@@ -6,7 +6,7 @@ import { allFlags, noFlags } from '../helpers/yargs'
 const load = td.replace('../../src/util/load')
 td.when(load.envs()).thenResolve(['development'])
 td.when(load.funcs()).thenResolve(['myfunction'])
-td.when(load.pkg()).thenReturn({ shep: { apiId: '123456' } })
+td.when(load.pkg()).thenResolve({ shep: { apiId: '123456' } })
 
 const inquirer = td.replace('inquirer')
 td.when(inquirer.prompt(), { ignoreExtraArgs: true }).thenResolve({})

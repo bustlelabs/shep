@@ -1,5 +1,4 @@
 import { readdir, readJSON } from './modules/fs'
-import { MissingShepConfiguration } from './errors'
 import minimatch from 'minimatch'
 import { listAliases, isFunctionDeployed } from './aws/lambda'
 import Promise from 'bluebird'
@@ -22,7 +21,7 @@ export async function envs () {
     return acc
   }, allAliases.pop())
 
-  if (aliases.length === 0) { throw new AliasesNotFound() }
+  if (!aliases || aliases.length === 0) { throw new AliasesNotFound() }
 
   return aliases
 }
@@ -106,5 +105,14 @@ export class AliasesNotFound extends Error {
     super()
     this.message = 'Cannot load available aliases, to create an alias use `shep deploy --env beta`'
     this.name = 'AliasesNotFound'
+  }
+}
+
+export class MissingShepConfiguration extends Error {
+  constructor (message) {
+    const msg = message || 'Missing shep section in package.json'
+    super(msg)
+    this.message = msg
+    this.name = 'MissingShepConfiguration'
   }
 }
