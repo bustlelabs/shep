@@ -41,10 +41,11 @@ export async function handler (opts) {
 
   logger({ type: 'start', body: 'Set environment variables on functions in AWS' })
   try {
-    await configSet(merge({}, inputs, opts))
+    const versions = await configSet(merge({}, inputs, opts))
+    logger({ type: 'done' })
+    versions.forEach(({ name, FunctionVersion }) => logger(`Updated ${name} to version ${FunctionVersion}`))
   } catch (e) {
     logger({ type: 'fail' })
     throw e
   }
-  logger({ type: 'done' })
 }

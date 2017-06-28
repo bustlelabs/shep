@@ -121,7 +121,7 @@ const webpackArgs = {
 test([allFlags, noFlags], 'webpack', webpackParser, webpackArgs)
 
 const configRemove = td.replace('../../src/config-remove')
-td.when(configRemove(), { ignoreExtraArgs: true }).thenResolve()
+td.when(configRemove(), { ignoreExtraArgs: true }).thenResolve([])
 const removeParser = yargs.command(require('../../src/commands/config/remove'))
 
 test('config remove command', (t) => {
@@ -131,7 +131,7 @@ test('config remove command', (t) => {
 })
 
 const configSet = td.replace('../../src/config-set')
-td.when(configSet(), { ignoreExtraArgs: true }).thenResolve()
+td.when(configSet(), { ignoreExtraArgs: true }).thenResolve([])
 const setParser = yargs.command(require('../../src/commands/config/set'))
 
 test('config set command', (t) => {

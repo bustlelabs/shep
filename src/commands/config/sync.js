@@ -33,11 +33,12 @@ export async function handler (opts) {
   await Promise.each([...aliases], async (alias) => {
     try {
       logger({ type: 'start', body: `Syncing ${alias} environment across all functions` })
-      await sync({ env: alias })
+      const versions = await sync({ env: alias })
+      logger({ type: 'done' })
+      versions.forEach(({ name, FunctionVersion }) => logger(`Updated ${name} to version ${FunctionVersion} for ${alias}`))
     } catch (e) {
       logger({ type: 'fail' })
       throw e
     }
   })
-  logger({ type: 'done' })
 }

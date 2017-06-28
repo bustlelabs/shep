@@ -20,6 +20,5 @@ export default async function ({ env }) {
     return acc
   }, common)
 
-  await uploadEnvironment(env, combinedEnvironment)
-  return combinedEnvironment
+  return uploadEnvironment(env, combinedEnvironment)
 }

@@ -25,7 +25,7 @@ Shep will require your amazon credentials and will load them using the same meth
 
 ### AWS S3 Build Artifacts
 
-Shep stores build artifacts on S3 so it can skip the upload step when your functions don't change. By default, Lambda won't update the version of an alias unless the function has changed - so this will come into effect for deploys of config changes.
+Shep stores build artifacts on S3 so it can skip the upload step when your functions don't change. By default, Lambda won't update the version of an alias unless the function has changed - so this will come into effect for deploys of config changes. This isn't enabled by default, to enable it add the name of the S3 bucket to the `"bucket"` field in the `shep` version of your `package.json`.
 
 ### Installation
 

@@ -36,10 +36,12 @@ export async function handler (opts) {
 
   logger({ type: 'start', body: 'Remove environment variables on functions in AWS' })
   try {
-    await configRemove(merge({}, inputs, opts))
+    const versions = await configRemove(merge({}, inputs, opts))
+    logger({ type: 'done' })
+    logger(`Removed ${opts.vars.join(', ')} from ${inputs.env}`)
+    versions.forEach(({ name, FunctionVersion }) => logger(`Updated ${name} to version ${FunctionVersion}`))
   } catch (e) {
     logger({ type: 'fail' })
     throw e
   }
-  logger({ type: 'done', body: `Removed ${opts.vars.join(', ')} from ${inputs.env}` })
 }
