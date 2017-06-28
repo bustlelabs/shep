@@ -1,8 +1,9 @@
+import Promise from 'bluebird'
 import buildFuncs from '../util/build-functions'
 import upload from '../util/upload-functions'
 import uploadBuilds from '../util/upload-builds'
 import { deploy } from '../util/aws/api-gateway'
-import promoteAliases from '../util/promote-aliases'
+import { publishFunction } from '../util/aws/lambda'
 import setPermissions from '../util/set-permissions'
 import * as load from '../util/load'
 import push from '../util/push-api'
@@ -10,7 +11,7 @@ import push from '../util/push-api'
 export default async function ({ apiId, functions = '*', env = 'development', region, bucket, build = true, logger = () => {} }) {
   const api = await load.api()
 
-  let uploadFuncs
+  let uploadFuncs, aliases
   let shouldUpload = true
 
   try {
@@ -50,7 +51,11 @@ export default async function ({ apiId, functions = '*', env = 'development', re
     }
 
     logger({ type: 'start', body: 'Promote Function Aliases' })
-    await promoteAliases(functions, env)
+    aliases = await Promise.map(load.funcs(functions), async (fn) => {
+      const config = await load.lambdaConfig(fn)
+      const { FunctionVersion } = await publishFunction(config, env)
+      return { Name: fn, FunctionVersion }
+    })
 
     if (api) {
       logger({ type: 'start', body: 'Setup Lambda Permissions' })
@@ -69,6 +74,7 @@ export default async function ({ apiId, functions = '*', env = 'development', re
 
   logger({ type: 'done' })
 
+  aliases.map(({ Name, FunctionVersion }) => `Deployed version ${FunctionVersion} for ${Name}`).forEach((n) => logger(n))
   if (apiId) { logger(`API URL: https://${apiId}.execute-api.${region}.amazonaws.com/${env}`) }
   return `https://${apiId}.execute-api.${region}.amazonaws.com/${env}`
 }

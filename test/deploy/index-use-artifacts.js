@@ -12,15 +12,15 @@ const build = td.replace('../../src/util/build-functions')
 td.when(build(), { ignoreExtraArgs: true }).thenResolve()
 const apiGateway = td.replace('../../src/util/aws/api-gateway')
 td.when(apiGateway.deploy(), { ignoreExtraArgs: true }).thenResolve()
-
-const promoteAliases = td.replace('../../src/util/promote-aliases')
-td.when(promoteAliases(functions, env)).thenResolve(uploadedFuncs)
+const lambda = td.replace('../../src/util/aws/lambda')
+td.when(lambda.publishFunction(), { ignoreExtraArgs: true }).thenResolve({})
 
 const setPermissions = td.replace('../../src/util/set-permissions')
 td.when(setPermissions(), { ignoreExtraArgs: true }).thenResolve()
 
 const load = td.replace('../../src/util/load')
 td.when(load.api()).thenResolve(api)
+td.when(load.funcs(td.matchers.isA(String))).thenResolve([])
 
 const push = td.replace('../../src/util/push-api')
 td.when(push(api), { ignoreExtraArgs: true }).thenResolve(apiId)
