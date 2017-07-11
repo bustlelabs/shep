@@ -4,7 +4,6 @@ import { funcs, distPath } from './load'
 import zipDir from './zip-dir'
 import { putBuild, buildExists } from './aws/s3'
 
-// remind me to fix this or make it more clean or something
 export default async function (pattern, bucket) {
   const fns = await funcs(pattern)
   return Promise.map(fns, async (func) => {
