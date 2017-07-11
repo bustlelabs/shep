@@ -5,7 +5,7 @@ const lambda = td.replace('../../src/util/aws/lambda')
 
 const load = require('../../src/util/load')
 
-test.before(() => process.chdir('./test/fixtures'))
+test.before(() => process.chdir('./test-ava/fixtures'))
 
 test('Loads environments', async (t) => {
   const fooAliases = [

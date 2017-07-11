@@ -1,6 +1,11 @@
 {
   "env": {
-    "node": true
+    "node": true,
+    "mocha": true
+  },
+  "globals": {
+    "assert": false,
+    "td": false
   },
   "extends": [
     "standard",
