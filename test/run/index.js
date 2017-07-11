@@ -1,14 +1,16 @@
+import path from 'path'
 import test from 'ava'
 import td from '../helpers/testdouble'
 
 const funcName = 'foo'
 const handler = 'handler'
 const config = { Handler: `index.${handler}` }
-const events = [{}]
+const events = ['event']
 const lambdaFunc = td.object([handler])
 td.when(lambdaFunc[handler](td.matchers.anything(), td.matchers.isA(Object))).thenCallback(null, 'bar')
 
 const load = td.replace('../../src/util/load')
+load.distPath = async (joinPath) => joinPath ? path.join('dist', joinPath) : 'dist'
 td.when(load.funcs(funcName)).thenResolve([funcName])
 td.when(load.lambdaConfig(funcName)).thenResolve(config)
 td.when(load.events(funcName, td.matchers.anything())).thenResolve(events)

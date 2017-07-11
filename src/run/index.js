@@ -1,3 +1,4 @@
+import path from 'path'
 import requireProject from '../util/require-project'
 import * as load from '../util/load'
 import build from '../util/build-functions'
@@ -47,16 +48,18 @@ function runFunction (opts) {
 
     performBuild ? await build(name, env) : require('babel-register')
 
-    const funcPath = `${performBuild ? 'dist' : 'functions'}/${name}/${fileName}.js`
+    const funcName = path.join(name, `${fileName}.js`)
+    const funcPath = performBuild ? (await load.distPath(funcName)) : path.join('functions', funcName)
 
     const func = requireProject(funcPath)[handler]
 
     if (typeof func !== 'function') {
-      return Promise.reject(new Error(`Handler function provided is not a function. Please verify that there exists a handler function exported as ${handler} in dist/${name}/${fileName}.js`))
+      throw new Error(`Handler function provided is not a function. Please verify that there exists a handler function exported as "${handler}" in "${funcPath}"`)
     }
 
     return Promise.map(events, (eventFilename) => {
-      const event = requireProject(`functions/${name}/events/${eventFilename}`)
+      if (typeof eventFilename !== 'string') { throw new Error('"eventFilename" must be a string') }
+      const event = requireProject(path.join(`functions`, name, 'events', eventFilename))
       return new Promise((resolve) => {
         const { context, callbackWrapper } = ctx(lambdaConfig)
         const output = { name: eventFilename, funcName: name }

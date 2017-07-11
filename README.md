@@ -45,7 +45,9 @@ Add a few lines to your `package.json`. Your [account id](https://console.aws.am
   "name": "my-great-package",
     "shep": {
       "accountId": "XXXXX",
-      "region": "us-east-1"
+      "region": "us-east-1",
+      "bucket": "my-great-bucket", // optional upload builds to s3 instead of directly to lambda
+      "dist": "dist" // optional, customize the dist folder location
     }
 }
 ```

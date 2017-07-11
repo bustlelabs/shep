@@ -21,7 +21,7 @@ export function builder (yargs) {
   .default('quiet', false)
   .alias('q', 'quiet')
   .example('shep generate function', 'Launch an interactive CLI')
-  .example('shep generate function foo', 'Genereate a new functon called "foo"')
+  .example('shep generate function foo', 'Generate a new function called "foo"')
 }
 
 export async function handler (opts) {

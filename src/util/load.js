@@ -1,3 +1,4 @@
+import path from 'path'
 import { readdir, readJSON } from './modules/fs'
 import minimatch from 'minimatch'
 import { listAliases, isFunctionDeployed } from './aws/lambda'
@@ -59,6 +60,14 @@ export async function pkg () {
   const pkg = await readJSON('package.json')
   if (!pkg || !pkg.shep) { throw new MissingShepConfiguration() }
   return pkg
+}
+
+export async function distPath (joinedPath) {
+  const { shep: { dist = 'dist' } } = await pkg()
+  if (joinedPath) {
+    return path.join(dist, joinedPath)
+  }
+  return dist
 }
 
 export async function api () {

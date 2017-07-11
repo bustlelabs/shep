@@ -12,7 +12,7 @@ Commands:
   new [path]     Create a new shep project
   pull           Pulls a swagger JSON representation of an existing API and writes it to a local file
   push           Create a new shep project
-  run [pattern]  Run a function in your local environemnt
+  run [pattern]  Run a function in your local environment
 
 Options:
   --version  Show version number                                                                               [boolean]
@@ -167,7 +167,7 @@ Options:
 
 Examples:
   shep generate function      Launch an interactive CLI
-  shep generate function foo  Genereate a new functon called "foo"
+  shep generate function foo  Generate a new function called "foo"
 ```
 #### `shep generate webpack`
 ```
@@ -267,7 +267,7 @@ Examples:
   shep run foo --build          Builds the `foo` function and then runs it
   shep run foo --event default  Runs the `foo` function for just the `default` event
   DB_TABLE=custom shep run foo  Runs the `foo` function with process.env.DB_TABLE assigned to custom (vars declared this
-                                way will overwrite vals in your .env file)
+                                way will overwrite values in your .env file)
   shep run '*'                  Runs all functions for all events
   shep run 'foo-*'              Runs all functions matching pattern `foo-*`
 ```
