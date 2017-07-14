@@ -91,6 +91,7 @@ export async function updateFunction (oldFunction, wantedFunction) {
   const updateConfigParams = { FunctionName }
   const publishVersionParams = { FunctionName }
   const updateAliasParams = { FunctionName }
+  const aliasExists = await doesAliasExist({ FunctionName, Alias })
 
   if (wantedFunction.Code.Zip) {
     debug('updateFunction: using zip file for code')
@@ -100,10 +101,11 @@ export async function updateFunction (oldFunction, wantedFunction) {
     updateCodeParams.S3Bucket = wantedFunction.Code.s3.bucket
     updateCodeParams.S3Key = wantedFunction.Code.s3.key
   } else {
-    const { Code } = await lambda.getFunction({ FunctionName: oldFunction.FunctionName, Qualifier: Alias }).promise()
+    const { Code } = await lambda.getFunction({ FunctionName: oldFunction.FunctionName, Qualifier: (aliasExists ? Alias : undefined) }).promise()
     debug('updateFunction: downloading', Code.Location)
     updateCodeParams.ZipFile = (await got(Code.Location, { encoding: null })).body
   }
+
   debug('updateFunction: updateFunctionCode()', updateCodeParams)
   const uploadedFunc = await lambda.updateFunctionCode(updateCodeParams).promise()
   publishVersionParams.CodeSha256 = uploadedFunc.CodeSha256
@@ -111,17 +113,23 @@ export async function updateFunction (oldFunction, wantedFunction) {
   merge(updateConfigParams, configStripper(wantedFunction.Config))
   debug('updateFunction: updateConfig.Environment()', updateConfigParams.Environment.Variables)
   const configState = await lambda.updateFunctionConfiguration((updateConfigParams)).promise()
-  if (configState.CodeSha256 !== publishVersionParams.CodeSha256) { throw new Error('different shas') }
+
+  if (configState.CodeSha256 !== publishVersionParams.CodeSha256) { throw new AWSUnexpectedLambdaState('Different CodeSha256') }
   debug('publishVersion:', publishVersionParams)
   const updatedFunc = await lambda.publishVersion(publishVersionParams).promise()
   if (!isConfigEqual(configState, updatedFunc)) {
-    throw new Error('Failing to update alias as function configs are not as expected')
+    throw new AWSUnexpectedLambdaState('Failing to update alias as function configs are not as expected')
   }
 
   updateAliasParams.FunctionVersion = updatedFunc.Version
   updateAliasParams.Name = Alias
+
+  if (aliasExists) {
+    await lambda.updateAlias(updateAliasParams).promise()
+  } else {
+    await lambda.createAlias(updateAliasParams).promise()
+  }
   debug('updateAlias:', updateAliasParams)
-  await lambda.updateAlias(updateAliasParams).promise()
 
   debug('updateFunction success!', updateAliasParams)
   return {
@@ -174,9 +182,22 @@ export async function isFunctionDeployed (FunctionName, Qualifier) {
   try {
     await getFunction({ FunctionName, Qualifier })
     return true
-  } catch (e) {
-    if (e.code !== 'ResourceNotFoundException') { throw e }
-    return false
+  } catch (err) {
+    if (err.code === 'ResourceNotFoundException') { return false }
+    throw err
+  }
+}
+
+export async function doesAliasExist ({ FunctionName, Alias }) {
+  await loadRegion()
+  const lambda = new AWS.Lambda()
+
+  try {
+    await lambda.getAlias({ FunctionName, Name: Alias }).promise()
+    return true
+  } catch (err) {
+    if (err.code === 'ResourceNotFoundException') { return false }
+    throw err
   }
 }
 
@@ -257,5 +278,14 @@ export class AWSInvalidLambdaConfiguration extends Error {
     super(msg)
     this.message = msg
     this.name = 'AWSInvalidLambdaConfiguration'
+  }
+}
+
+export class AWSUnexpectedLambdaState extends Error {
+  constructor (additional) {
+    const msg = `While updating the lambda function, the state changed before the update could be completed. ${additional}`
+    super(msg)
+    this.message = msg
+    this.name = 'AWSUnexpectedLambdaState'
   }
 }
