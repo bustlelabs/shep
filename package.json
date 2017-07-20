@@ -78,7 +78,7 @@
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^3.4.2",
     "np": "^2.12.0",
-    "testdouble": "^2.1.2"
+    "testdouble": "^3.0.0"
   },
   "babel": {
     "presets": [
