@@ -1,39 +1,54 @@
 describe('shep.build', () => {
-  const exec = td.replace('../src/util/modules/exec')
-  td.when(exec(), { ignoreExtraArgs: true }).thenResolve()
-
   it('Executes custom command', async () => {
     const buildCommand = 'custom-build --cool-flag -x 6'
-    const load = td.replace('../src/util/load')
-    td.when(load.pkg()).thenResolve({ shep: { buildCommand } })
-    td.when(exec(), { ignoreExtraArgs: true }).thenResolve()
-    const shep = require('../src')
+    const exec = async (command) => {
+      assert.equal(command, buildCommand)
+    }
+    exec['@global'] = true
+    const shep = proxyquire('../src/', {
+      './load': {
+        '@global': true,
+        pkg: async () => { return { shep: { buildCommand } } }
+      },
+      './modules/exec': exec
+    })
 
-    td.when(exec(buildCommand), { ignoreExtraArgs: true }).thenResolve()
     await shep.build({ quiet: true })
   })
 
   it('Logs to console when no webpack found', async () => {
-    let error = new Error()
+    const error = new Error()
     error.code = 'ENOENT'
 
-    const load = td.replace('../src/util/load')
-    td.when(load.pkg()).thenResolve({ shep: {} })
+    const exec = async (command) => {
+      throw error
+    }
+    exec['@global'] = true
 
-    td.when(exec('webpack --bail'), { ignoreExtraArgs: true }).thenReject(error)
-    td.replace(console, 'warn')
+    const shep = proxyquire('../src/', {
+      './load': {
+        '@global': true,
+        pkg: async () => { return { shep: { } } }
+      },
+      './modules/exec': exec
+    })
 
-    const shep = require('../src')
-    error = await assert.isRejected(shep.build({ quiet: true }))
-    assert.equal(error.code, 'ENOENT')
-    td.verify(console.warn(), { ignoreExtraArgs: true })
+    assert.deepEqual(await assert.isRejected(shep.build({ quiet: true })), error)
   })
 
-  describe('Executed webpack', async () => {
-    const load = td.replace('../src/util/load')
-    const shep = require('../src')
-    td.when(load.pkg()).thenResolve({})
-    td.when(exec('webpack --bail'), { ignoreExtraArgs: true }).thenResolve()
+  it('Executed webpack', async () => {
+    const exec = async (command) => {
+      assert.equal(command, 'webpack --bail')
+    }
+    exec['@global'] = true
+
+    const shep = proxyquire('../src/', {
+      './load': {
+        '@global': true,
+        pkg: async () => { return { shep: { } } }
+      },
+      './modules/exec': exec
+    })
     await shep.build({ quiet: true })
   })
 })

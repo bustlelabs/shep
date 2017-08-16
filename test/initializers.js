@@ -1,9 +1,6 @@
-import td from 'testdouble'
-import Promise from 'bluebird'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
+import proxyquire from 'proxyquire'
 
 chai.use(chaiAsPromised)
-
-td.config({ promiseConstructor: Promise, ignoreWarnings: true })
-global.td = td
+global.proxyquire = proxyquire.noPreserveCache()

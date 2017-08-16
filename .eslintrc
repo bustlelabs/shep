@@ -5,7 +5,7 @@
   },
   "globals": {
     "assert": false,
-    "td": false
+    "proxyquire": false
   },
   "extends": [
     "standard",

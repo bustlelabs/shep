@@ -181,11 +181,11 @@ export async function isFunctionDeployed (FunctionName, Qualifier) {
 
   try {
     await getFunction({ FunctionName, Qualifier })
-    return true
   } catch (err) {
     if (err.code === 'ResourceNotFoundException') { return false }
     throw err
   }
+  return true
 }
 
 export async function doesAliasExist ({ FunctionName, Alias }) {
@@ -194,11 +194,11 @@ export async function doesAliasExist ({ FunctionName, Alias }) {
 
   try {
     await lambda.getAlias({ FunctionName, Name: Alias }).promise()
-    return true
   } catch (err) {
     if (err.code === 'ResourceNotFoundException') { return false }
     throw err
   }
+  return true
 }
 
 export async function getEnvironment (env, { FunctionName }) {
@@ -215,8 +215,10 @@ export async function getEnvironment (env, { FunctionName }) {
     .get('Variables')
     return envVars
   } catch (e) {
-    if (e.code !== 'ResourceNotFoundException') { throw e }
-    throw new AWSEnvironmentVariableNotFound(FunctionName)
+    if (e.code === 'ResourceNotFoundException') {
+      throw new AWSEnvironmentVariableNotFound(FunctionName)
+    }
+    throw e
   }
 }
 
@@ -230,7 +232,7 @@ export async function getAliasVersion ({ functionName, aliasName }) {
   }
 
   return lambda.getAlias(params).promise()
-  .get('FunctionVersion')
+    .get('FunctionVersion')
 }
 
 export async function setPermission ({ name, region, env, apiId, accountId }) {

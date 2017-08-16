@@ -1,28 +1,33 @@
+import isEqual from 'lodash.isequal'
 import path from 'path'
+import Promise from 'bluebird'
 import { readdir, readJSON } from './modules/fs'
 import minimatch from 'minimatch'
 import { listAliases, isFunctionDeployed } from './aws/lambda'
-import Promise from 'bluebird'
 
 export async function envs () {
-  const fullFuncNames = await Promise.map(this.funcs(), this.lambdaConfig)
-  .map(({ FunctionName }) => FunctionName)
+  const functionLambdaConfigs = await Promise.map(funcs(), lambdaConfig).map(({ FunctionName }) => FunctionName)
 
-  const deployedFunctions = await Promise.filter(fullFuncNames, (x) => isFunctionDeployed(x))
-  const allAliases = await Promise.map(deployedFunctions, (name) => listAliases(name).map(({ Name }) => Name))
+  const deployedFunctions = await Promise.filter(functionLambdaConfigs, (name) => isFunctionDeployed(name))
+  if (deployedFunctions.length <= 0) {
+    throw new Error('No deployed functions')
+  }
 
-  const aliases = allAliases.reduce((acc, aliasSet) => {
-    const missingAliases = aliasSet.filter((alias) => acc.indexOf(alias) === -1)
-          .concat(acc.filter((alias) => aliasSet.indexOf(alias) === -1))
+  const allFunctionAliases = await Promise.map(deployedFunctions, async name => {
+    const aliases = await listAliases(name).map(({ Name }) => Name)
+    return aliases.sort()
+  })
 
-    if (missingAliases.length !== 0) {
-      throw new EnvironmentMismatch()
+  const aliases = allFunctionAliases.pop().sort()
+  if (aliases.length === 0) {
+    throw new AliasesNotFound()
+  }
+
+  allFunctionAliases.forEach(functionAliases => {
+    if (!isEqual(aliases, functionAliases)) {
+      throw EnvironmentMismatch()
     }
-
-    return acc
-  }, allAliases.pop())
-
-  if (!aliases || aliases.length === 0) { throw new AliasesNotFound() }
+  })
 
   return aliases
 }
@@ -44,16 +49,15 @@ export async function funcs (pattern = '*') {
   const funcs = await readdir('functions').filter(minimatch.filter(pattern))
   if (funcs.length === 0) {
     throw new FunctionNotFound(pattern)
-  } else {
-    return funcs
   }
+  return funcs
 }
 
 export async function lambdaConfig (name) {
   const functionConfig = await readJSON(`functions/${name}/lambda.json`)
   const projectConfig = await readJSON(`lambda.json`)
 
-  return Object.assign(projectConfig, functionConfig)
+  return Object.assign({}, projectConfig, functionConfig)
 }
 
 export async function pkg () {
