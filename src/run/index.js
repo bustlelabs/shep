@@ -7,8 +7,6 @@ import chalk from 'chalk'
 import ctx from '../util/context'
 import cliui from 'cliui'
 
-require('dotenv').config()
-
 const ui = cliui({ width: 80 })
 
 const results = { success: 'SUCCESS', error: 'ERROR', exception: 'EXCEPTION' }
@@ -39,6 +37,7 @@ export default async function (opts) {
 }
 
 function runFunction (opts) {
+  require('dotenv').config()
   return async (name) => {
     const env = opts.environment || 'development'
     const performBuild = opts.build
