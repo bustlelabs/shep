@@ -25,7 +25,7 @@ export async function envs () {
 
   allFunctionAliases.forEach(functionAliases => {
     if (!isEqual(aliases, functionAliases)) {
-      throw EnvironmentMismatch()
+      throw new EnvironmentMismatch()
     }
   })
 
