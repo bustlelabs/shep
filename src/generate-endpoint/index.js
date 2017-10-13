@@ -8,7 +8,7 @@ const { MissingShepConfiguration } = load
 
 const integration = 'x-amazon-apigateway-integration'
 
-export default async function ({ accountId, path, method, logger = () => {} }) {
+export default async function ({ accountId, path, method, region, logger = () => {} }) {
   if (!accountId) {
     throw new MissingShepConfiguration('Unable to determine your AWS Account ID. Please set it in the `shep` section of package.json')
   }
@@ -23,7 +23,7 @@ export default async function ({ accountId, path, method, logger = () => {} }) {
     await generateFunction({ name, quiet: true })
 
     logger({ type: 'start', body: 'Setup Endpoint' })
-    addPath(api, path, method, accountId, fullName)
+    addPath(api, path, method, accountId, fullName, region)
 
     logger({ type: 'start', body: 'Setup CORS' })
     setupCORS(api, path)
@@ -39,7 +39,7 @@ export default async function ({ accountId, path, method, logger = () => {} }) {
   return path
 }
 
-function addPath (api, path, method, accountId, functionName) {
+function addPath (api, path, method, accountId, functionName, region = 'us-east-1') {
   if (method === 'any') { method = 'x-amazon-apigateway-any-method' }
 
   if (!api.paths) {
@@ -50,7 +50,7 @@ function addPath (api, path, method, accountId, functionName) {
   if (api.paths[path][method] !== undefined) { throw new DuplicateEndpointError(method, path) }
   api.paths[path][method] = api.paths[path][method] || {}
   api.paths[path][method][integration] = {
-    uri: `arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:${accountId}:function:${functionName}:\${stageVariables.functionAlias}/invocations`,
+    uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountId}:function:${functionName}:\${stageVariables.functionAlias}/invocations`,
     passthroughBehavior: 'when_no_match',
     httpMethod: 'POST',
     type: 'aws_proxy'
