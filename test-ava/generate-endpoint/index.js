@@ -10,15 +10,15 @@ const path = '/foo'
 const method = 'get'
 const accountId = 'testid'
 
-let shep;
+let shep
 
 td.when(fs.readJSON('package.json')).thenResolve({ name: 'bar', shep: {} })
 td.when(fs.writeJSON(), { ignoreExtraArgs: true }).thenResolve()
 
-const functionName = 'noice-name-bro';
+const functionName = 'noice-name-bro'
 const generateName = td.replace('../../src/util/generate-name')
 td.when(generateName(), { ignoreExtraArgs: true }).thenResolve({
-  fullName: functionName,
+  fullName: functionName
 })
 
 test.before(async () => {
@@ -26,10 +26,10 @@ test.before(async () => {
 })
 
 test.beforeEach((t) => {
-  t.context.paths = {};
+  t.context.paths = {}
 
   td.when(load.api()).thenResolve({ paths: t.context.paths })
-});
+})
 
 test('Writes a new api.json file', async () => {
   await shep.generateEndpoint({ accountId, path, method })
@@ -48,11 +48,11 @@ const constructIntegrationObject = (accountId, region) => ({
   uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountId}:function:${functionName}:\${stageVariables.functionAlias}/invocations`,
   passthroughBehavior: 'when_no_match',
   httpMethod: 'POST',
-  type: 'aws_proxy',
+  type: 'aws_proxy'
 })
 
 test('adds a basic api path', async (t) => {
-  const region = 'us-west-2';
+  const region = 'us-west-2'
 
   await shep.generateEndpoint({ accountId, path, method, region })
 
@@ -64,4 +64,3 @@ test('defaults to us-east-1 region', async (t) => {
 
   t.deepEqual(t.context.paths[path][method][integration], constructIntegrationObject(accountId, 'us-east-1'))
 })
-
