@@ -16,9 +16,6 @@ export default async function (fns, env) {
       wantedFunc.Code.Zip = await zipDir(path)
     }
 
-    // possible cases
-    // completely new func, new alias, update version
-
     if (await isFunctionDeployed(config.FunctionName)) {
       const aliasExists = await doesAliasExist({ FunctionName: config.FunctionName, Alias: env })
       const oldFunc = await getFunction({ FunctionName: config.FunctionName, Qualifier: aliasExists ? env : undefined })
