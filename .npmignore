@@ -1,5 +1,6 @@
 src/
 test/
+test-ava/
 tmp/
 .travis.yml
 .jshintrc
