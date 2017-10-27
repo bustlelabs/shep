@@ -7,7 +7,7 @@ import { AWSEnvironmentVariableNotFound } from './errors'
 const pattern = '*'
 
 export default async function (env, vars) {
-  const configs = await Promise.map(funcs(pattern), async (name) => { return { name, config: await lambdaConfig(name) } })
+  const configs = await Promise.map(funcs(pattern), async (name) => { return { name, config: await lambdaConfig(name, env) } })
   return Promise.map(configs, async ({ name, config }) => {
     const oldFunc = await getFunction({ FunctionName: config.FunctionName, Qualifier: env })
     const wantedFunc = merge({}, oldFunc)
