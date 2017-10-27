@@ -56,6 +56,17 @@ Add a few lines to your `package.json`. Your [account id](https://console.aws.am
 
 Environments for a shep project are defined by the aliases on the functions associated with a project. Environments are created through `shep deploy --env new_env` and managed by using the `shep config` commands. Shep takes a strong stance against having different environments for different functions within a project. If you attempt a command which requires the listing of environments and there is a mismatch detected, then shep will throw a `EnvironmentMistmach` error until you remedy the issue. Most issues can be automatically fixed by using `shep config sync`, the only issues this can't solve are conflicting environment variable values. Conflicting value issues can be solved by using `shep config set my_env CONFLICT_VARIABLE=value`.
 
+Additionally, environment specific configuration for the lambda deployment itself can be defined in both the project's and function's `lambda.{env}.json` files. This is particularly useful in specifying which VPC a lambda function should be placed in when you have a VPC per environment setup. Additionally if you are still using the `nodejs4.3` runtime in production and are looking to upgrade to the `nodejs6.10` runtime, you can test this in only for your development stage.
+
+```json
+{
+  "VpcConfig": {
+    "SecurityGroupIds": [ "sg-12345678" ],
+    "SubnetIds": [ "subnet-12345678", "subnet-abcdef12", "subnet-abcd1234" ]
+  },
+  "Runtime": "nodejs6.10"
+}
+```
 ### Custom Builds Commands
 
 By default shep builds all your functions using webpack. If your project requires a different build process, then edit your `package.json`. Before running your build command, shep populates the `PATTERN` environment variable which can be accessed as `process.env.PATTERN` in your build command. Be aware that using your own build process will break pattern matching for `shep build` unless your build command respects the `PATTERN` variable.
