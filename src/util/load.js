@@ -1,7 +1,7 @@
 import isEqual from 'lodash.isequal'
 import path from 'path'
 import Promise from 'bluebird'
-import { readdir, readJSON } from './modules/fs'
+import { readdir, readJSON, exists } from './modules/fs'
 import minimatch from 'minimatch'
 import { listAliases, isFunctionDeployed } from './aws/lambda'
 
@@ -55,9 +55,11 @@ export async function funcs (pattern = '*') {
 
 export async function lambdaConfig (name, env = null) {
   const functionConfig = await readJSON(`functions/${name}/lambda.json`)
-  const functionEnvConfig = env ? await readJSON(`functions/${name}/lambda.${env}.json`) : {}
+  const functionEnvConfigExists = env ? await exists(`functions/${name}/lambda.${env}.json`) : false
+  const functionEnvConfig = functionEnvConfigExists ? await readJSON(`functions/${name}/lambda.${env}.json`) : {}
   const projectConfig = await readJSON(`lambda.json`)
-  const projectEnvConfig = env ? await readJSON(`lambda.${env}.json`) : {}
+  const projectEnvConfigExists = env ? await exists(`lambda.${env}.json`) : false
+  const projectEnvConfig = projectEnvConfigExists ? await readJSON(`lambda.${env}.json`) : {}
 
   return Object.assign({}, projectConfig, projectEnvConfig, functionConfig, functionEnvConfig)
 }
