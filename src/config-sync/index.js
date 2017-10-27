@@ -6,7 +6,7 @@ import uploadEnvironment from '../util/upload-environment'
 import { funcs, lambdaConfig } from '../util/load'
 
 export default async function ({ env }) {
-  const configs = await Promise.map(funcs(), lambdaConfig)
+  const configs = await Promise.map(funcs(), (func) => lambdaConfig(func, env))
   const environments = await getFunctionEnvs(env, configs)
   const { common, differences, conflicts } = environmentCheck(environments)
 

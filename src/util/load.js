@@ -53,11 +53,13 @@ export async function funcs (pattern = '*') {
   return funcs
 }
 
-export async function lambdaConfig (name) {
+export async function lambdaConfig (name, env = null) {
   const functionConfig = await readJSON(`functions/${name}/lambda.json`)
+  const functionEnvConfig = env ? await readJSON(`functions/${name}/lambda.${env}.json`) : {}
   const projectConfig = await readJSON(`lambda.json`)
+  const projectEnvConfig = env ? await readJSON(`lambda.${env}.json`) : {}
 
-  return Object.assign({}, projectConfig, functionConfig)
+  return Object.assign({}, projectConfig, projectEnvConfig, functionConfig, functionEnvConfig)
 }
 
 export async function pkg () {
