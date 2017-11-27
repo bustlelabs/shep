@@ -8,11 +8,13 @@ Commands:
   deploy         Deploy functions and APIs to AWS. Will create a new API if the ID is not specified
   doctor         Checks your projects against best standards
   generate       Run `shep generate --help` for additional information
+  list           Lists endpoints
   logs [name]    Streams logs from the specified version of a function
   new [path]     Create a new shep project
   pull           Pulls a swagger JSON representation of an existing API and writes it to a local file
   push           Create a new shep project
   run [pattern]  Run a function in your local environment
+  serve          Start local server
 
 Options:
   --version  Show version number                                                                               [boolean]
@@ -184,6 +186,14 @@ Options:
 Examples:
   shep generate webpack -o foo.js  Writes default webpack configuration to foo.js
 ```
+#### `shep list`
+```
+shep list
+
+Options:
+  --version  Show version number                                                                               [boolean]
+  --help     Show help                                                                                         [boolean]
+```
 #### `shep logs`
 ```
 shep logs [name]
@@ -272,4 +282,16 @@ Examples:
                                 way will overwrite values in your .env file)
   shep run '*'                  Runs all functions for all events
   shep run 'foo-*'              Runs all functions matching pattern `foo-*`
+```
+#### `shep serve`
+```
+shep serve
+
+Options:
+  --version    Show version number                                                                             [boolean]
+  --help       Show help                                                                                       [boolean]
+  -q, --quiet  Don't log anything                                                                       [default: false]
+
+Examples:
+  shep serve  Starts local server
 ```
