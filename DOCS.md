@@ -290,8 +290,11 @@ shep serve
 Options:
   --version    Show version number                                                                             [boolean]
   --help       Show help                                                                                       [boolean]
+  --verbose    Show detailed logs                                                                       [default: false]
+  --port       Start local server on the given port                                                      [default: 3000]
   -q, --quiet  Don't log anything                                                                       [default: false]
 
 Examples:
-  shep serve  Starts local server
+  shep serve              Starts local server default port 3000
+  shep serve --port 4000  Starts local server on port 4000
 ```
