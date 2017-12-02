@@ -31,14 +31,12 @@ export default function runFunction (opts) {
     }
 
     return Promise.map(events, (event) => {
-      // if (typeof eventFilename !== 'string') { throw new Error('"eventFilename" must be a string') }
-      // const event = requireProject(path.join(`functions`, name, 'events', eventFilename))
       return new Promise((resolve) => {
         const { context, callbackWrapper } = ctx(lambdaConfig)
         const output = { name: event.name, funcName: name }
         output.start = new Date()
         try {
-          func(event.event, context, callbackWrapper((err, res) => {
+          func(event.data, context, callbackWrapper((err, res) => {
             output.end = new Date()
             if (err) {
               output.result = results.error
@@ -68,7 +66,7 @@ function getFunctionEvents(functionName, eventNames) {
 
     return {
       name: eventFilename,
-      event: requireProject(path.join(`functions`, functionName, 'events', eventFilename))
+      data: requireProject(path.join(`functions`, functionName, 'events', eventFilename))
     }
   })
 }

@@ -4,7 +4,6 @@ import http from 'http'
 import url from 'url'
 import querystring from 'querystring'
 import chalk from 'chalk'
-import reporter from '../util/reporter'
 import * as load from '../util/load'
 import requireProject from '../util/require-project'
 import ctx from '../util/context'
@@ -13,7 +12,6 @@ import runFunction from '../run/run-function'
 import list from '../list'
 
 export default async function serve(opts) {
-  const logger = opts.quiet ? () => {} : reporter()
   // get available endpoints
   const endpoints = await list(opts)
 
@@ -35,19 +33,19 @@ export default async function serve(opts) {
 
     console.log(`\n${chalk.green('URL     :')} ${request.originalUrl}`);
 
-    const route = getMatchingEndpoint(request, endpoints)
+    const endpoint = getMatchingEndpoint(request, endpoints)
 
-    if (!route) {
+    if (!endpoint) {
       if (!opts.quiet) {
-        console.log(`${chalk.red('Matching route found')}`)
+        console.log(`${chalk.red('Matching endpoint not found')}`)
       }
-      return response.end('Route not found')
+      return response.end('Endpoint not found')
     }
 
-    const handler = lambdaFunctions[route.handler].name
+    const handler = lambdaFunctions[endpoint.handler].name
 
     onData(request, () => {
-      const events = [].push(getEventFromRequest(request))
+      const events = [getEventFromRequest(request, endpoint)]
       runFunction(opts)(handler, events)
         .then(result => {
           if (opts.verbose) {
@@ -56,7 +54,7 @@ export default async function serve(opts) {
             console.log(`${chalk.green('Duration:')} ${result[0].end - result[0].start} ms`);
             console.log(`${chalk.green('Response:')}`, result[0].response);
           }
-          response.end('success')
+          response.end(JSON.stringify(result[0].response))
         })
         .catch(error => {
           if (opts.verbose) {
@@ -64,7 +62,7 @@ export default async function serve(opts) {
             console.log(`${chalk.green('Function:')} ${handler}`)
           }
           console.log(error);
-          response.end('error')
+          response.end(error)
         })
     })
   })
@@ -78,25 +76,65 @@ export default async function serve(opts) {
 
 
 function getMatchingEndpoint(request, endpoints) {
-  return endpoints
-          .filter(endpoint => {
-            // TODO: need to handle route param matching
-            return (endpoint.method.toUpperCase() === 'ANY' || endpoint.method.toUpperCase() === request.method)
-                   && endpoint.path === request.url.path
-          })
-          .shift()
+  for (var i = 0; i < endpoints.length; i++) {
+    if (endpoints[i].method.toUpperCase() === 'ANY' || endpoints[i].method.toUpperCase() === request.method) {
+      const match = matchEndpointPath(request.url.pathname, endpoints[i].path)
+      if (match.found) {
+        return Object.assign({}, endpoints[i], { pathParams: match.pathParams })
+      }
+    }
+  }
+  // match NotFound
+  return null;
 }
 
-function getEventFromRequest(request) {
+function matchEndpointPath(url, endpointPath) {
+  const urlSegments = url.split('/').slice(1)
+  const endpointSegments = endpointPath.split('/').slice(1)
+
+  if (urlSegments.length !== endpointSegments.length){
+    return { found: false, pathParams: null }
+  }
+
+  let pathParams = null
+
+  // resourceSegments, urlSegments - lengths are same
+  for (let i = 0; i < endpointSegments.length; i++) {
+    // if path param, capture its value
+    if (endpointSegments[i][0] === '{' && urlSegments[i]) {
+      pathParams = Object.assign({}, pathParams, {
+        [endpointSegments[i].slice(1,-1)]: urlSegments[i]
+      })
+    } else if (endpointSegments[i] !== urlSegments[i]) {
+      return {
+        found: false,
+        pathParams: null
+      }
+    }
+  }
+
   return {
-    resource: "",
-    path: "",
-    httpMethod: request.method,
-    headers: request.headers,
-    queryStringParameters: request.url.query,
-    pathParameters: {},
-    stageVariables: {},
-    body: request.body
+    found: true,
+    pathParams: pathParams
+  };
+}
+
+function getEventFromRequest(request, endpoint) {
+  // url.query will be {} when no params given, but aws expects it as null
+  const queryParams = Object.keys(request.url.query).length ? request.url.query : null
+  
+  return {
+    name: 'http-request',
+    data: {
+      resource: endpoint.path,
+      path: request.url.pathname,
+      httpMethod: request.method,
+      headers: request.headers,
+      queryStringParameters: queryParams , // {} or null
+      pathParameters: endpoint.pathParams, // {} or null
+      stageVariables: {},
+      body: request.body // data or null
+    }
   }
 }
 
