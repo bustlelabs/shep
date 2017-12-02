@@ -7,7 +7,12 @@ export function builder (yargs) {
   .describe('quiet', 'Don\'t log anything')
   .default('quiet', false)
   .alias('q', 'quiet')
-  .example('shep serve', 'Starts local server')
+  .describe('verbose', 'Show detailed logs')
+  .default('verbose', false)
+  .describe('port', 'Start local server on the given port')
+  .default('port', 3000)
+  .example('shep serve', 'Starts local server default port 3000')
+  .example('shep serve --port 4000', 'Starts local server on port 4000')
 }
 
 export async function handler (opts) {
