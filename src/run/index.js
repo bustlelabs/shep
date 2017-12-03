@@ -1,13 +1,9 @@
-import path from 'path'
-import requireProject from '../util/require-project'
 import * as load from '../util/load'
-import build from '../util/build-functions'
 import Promise from 'bluebird'
 import chalk from 'chalk'
 import cliui from 'cliui'
 import runFunction from './run-function'
 import results from './results'
-import getFunctionEvents from './get-events'
 
 const ui = cliui({ width: 80 })
 

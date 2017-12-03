@@ -59,7 +59,7 @@ export default function runFunction (opts) {
   }
 }
 
-function getFunctionEvents(functionName, eventNames) {
+function getFunctionEvents (functionName, eventNames) {
   // read event objects
   return eventNames.map(eventFilename => {
     if (typeof eventFilename !== 'string') { throw new Error('"eventFilename" must be a string') }

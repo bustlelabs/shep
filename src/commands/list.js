@@ -1,5 +1,4 @@
-import Table from 'cli-table';
-import reporter from '../util/reporter'
+import Table from 'cli-table'
 import list from '../list'
 
 export const command = 'list'

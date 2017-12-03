@@ -1,4 +1,4 @@
-export function getMatchingEndpoint(request, endpoints) {
+export function getMatchingEndpoint (request, endpoints) {
   for (var i = 0; i < endpoints.length; i++) {
     if (endpoints[i].method.toUpperCase() === 'ANY' || endpoints[i].method.toUpperCase() === request.method) {
       const match = matchEndpointPath(request.url.pathname, endpoints[i].path)
@@ -8,14 +8,14 @@ export function getMatchingEndpoint(request, endpoints) {
     }
   }
   // match NotFound
-  return null;
+  return null
 }
 
-export function matchEndpointPath(url, endpointPath) {
+export function matchEndpointPath (url, endpointPath) {
   const urlSegments = url.split('/').slice(1)
   const endpointSegments = endpointPath.split('/').slice(1)
 
-  if (urlSegments.length !== endpointSegments.length){
+  if (urlSegments.length !== endpointSegments.length) {
     return { found: false, pathParams: null }
   }
 
@@ -26,7 +26,7 @@ export function matchEndpointPath(url, endpointPath) {
     // if path param, capture its value
     if (endpointSegments[i][0] === '{' && urlSegments[i]) {
       pathParams = Object.assign({}, pathParams, {
-        [endpointSegments[i].slice(1,-1)]: urlSegments[i]
+        [endpointSegments[i].slice(1, -1)]: urlSegments[i]
       })
     } else if (endpointSegments[i] !== urlSegments[i]) {
       return {
@@ -39,10 +39,10 @@ export function matchEndpointPath(url, endpointPath) {
   return {
     found: true,
     pathParams: pathParams
-  };
+  }
 }
 
-export function getEventFromRequest(request, endpoint) {
+export function getEventFromRequest (request, endpoint) {
   // url.query will be {} when no params given, but aws expects it as null
   const queryParams = Object.keys(request.url.query).length ? request.url.query : null
 
@@ -53,7 +53,7 @@ export function getEventFromRequest(request, endpoint) {
       path: request.url.pathname,
       httpMethod: request.method,
       headers: request.headers,
-      queryStringParameters: queryParams , // {} or null
+      queryStringParameters: queryParams, // {} or null
       pathParameters: endpoint.pathParams, // {} or null
       stageVariables: {},
       body: request.body // data or null

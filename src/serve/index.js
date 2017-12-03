@@ -1,25 +1,19 @@
-import path from 'path'
-import Promise from 'bluebird'
 import http from 'http'
 import url from 'url'
 import querystring from 'querystring'
 import chalk from 'chalk'
 import * as load from '../util/load'
-import requireProject from '../util/require-project'
-import ctx from '../util/context'
-import build from '../util/build-functions'
 import runFunction from '../run/run-function'
 import list from '../list'
 import { getEventFromRequest, getMatchingEndpoint } from './helpers'
 
-export default async function serve(opts) {
-
+export default async function serve (opts) {
   // get available endpoints
   const endpoints = await list(opts)
 
   // get lambda functions
-  const lambdaFunctions = {};
-  const funcs = await load.funcs();
+  const lambdaFunctions = {}
+  const funcs = await load.funcs()
   for (let func of funcs) {
     const lambdaConfig = await load.lambdaConfig(func)
     lambdaFunctions[lambdaConfig.FunctionName] = {
@@ -29,17 +23,17 @@ export default async function serve(opts) {
   }
 
   // http listener
-  function listener(request, response) {
+  function listener (request, response) {
     request.originalUrl = request.url
     request.url = url.parse(request.url, true)
 
     // Allow CORS
-    response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    response.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    response.setHeader('Access-Control-Allow-Credentials', true);
+    response.setHeader('Access-Control-Allow-Origin', '*')
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
+    response.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type')
+    response.setHeader('Access-Control-Allow-Credentials', true)
 
-    console.log(`\n${chalk.green('URL     :')} ${request.originalUrl}`);
+    console.log(`\n${chalk.green('URL     :')} ${request.originalUrl}`)
 
     const endpoint = getMatchingEndpoint(request, endpoints)
     if (!endpoint) {
@@ -61,8 +55,8 @@ export default async function serve(opts) {
           if (opts.verbose) {
             console.log(`${chalk.green('Resource:')} ${endpoint.path}`)
             console.log(`${chalk.green('Function:')} ${result[0].funcName}`)
-            console.log(`${chalk.green('Duration:')} ${result[0].end - result[0].start} ms`);
-            console.log(`${chalk.green('Response:')}`, funcResponse);
+            console.log(`${chalk.green('Duration:')} ${result[0].end - result[0].start} ms`)
+            console.log(`${chalk.green('Response:')}`, funcResponse)
           }
 
           // validate response
@@ -89,7 +83,7 @@ export default async function serve(opts) {
             console.log(`${chalk.green('Resource:')} ${endpoint.path}`)
             console.log(`${chalk.green('Function:')} ${handler}`)
           }
-          console.log(error);
+          console.log(error)
           response.writeHead(500)
           response.end('InternalServerError')
         })
@@ -107,7 +101,7 @@ export default async function serve(opts) {
   // process.on('uncaughtException', () => {})
 }
 
-function validateFunctionResponse(funcResponse) {
+function validateFunctionResponse (funcResponse) {
   // statusCode: httpStatusCode
   if (funcResponse.statusCode && typeof funcResponse.statusCode !== 'number') {
     console.log(`${chalk.red('Function Response Error:')} statusCode must be a valid http status code`)
@@ -129,18 +123,19 @@ function validateFunctionResponse(funcResponse) {
   return true
 }
 
-function getContentType(request) {
-  return (request.headers['content-type'] || 'application/octet-stream').split(';')[0].toLowerCase();
+function getContentType (request) {
+  return (request.headers['content-type'] || 'application/octet-stream').split(';')[0].toLowerCase()
 }
 
-function onData(request, onComplete) {
-  let body = '';
+function onData (request, onComplete) {
+  let body = ''
   request.on('data', (data) => {
-    body += data;
+    body += data
     // Too much POST data, kill the connection!
     // 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
-    if (body.length > 1e6)
-      request.connection.destroy();
+    if (body.length > 1e6) {
+      request.connection.destroy()
+    }
   }).on('end', () => {
     // try parsing body
     try {
@@ -158,11 +153,11 @@ function onData(request, onComplete) {
       request.body = null
     }
 
-    onComplete();
-  });
+    onComplete()
+  })
 }
 
-function onError(error) {
+function onError (error) {
   if (error.syscall !== 'listen') {
     throw error
   }
@@ -172,11 +167,9 @@ function onError(error) {
     case 'EACCES':
       console.error(`Port ${error.port} requires elevated privileges`)
       process.exit(1)
-      break
     case 'EADDRINUSE':
       console.error(`Port ${error.port} is already in use`)
       process.exit(1)
-      break
     default:
       throw error
   }

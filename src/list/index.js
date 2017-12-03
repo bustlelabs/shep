@@ -1,7 +1,7 @@
 import * as load from '../util/load'
 import parseApi from '../util/parse-api'
 
-export default async function list(opts) {
+export default async function list (opts) {
   const api = await load.api() || {}
   let endpoints = parseApi(api)
   endpoints = endpoints
@@ -15,13 +15,13 @@ export default async function list(opts) {
   return endpoints
 }
 
-function getRegion(uri) {
+function getRegion (uri) {
   // `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountId}:function:${functionName}:\${stageVariables.functionAlias}/invocations`
   const uriParts = uri.split(':')
   return uriParts[3]
 }
 
-function getFunction(uri) {
+function getFunction (uri) {
   // `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountId}:function:${functionName}:\${stageVariables.functionAlias}/invocations`
   const uriParts = uri.split(':')
   return uriParts[11]
