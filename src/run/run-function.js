@@ -4,6 +4,7 @@ import requireProject from '../util/require-project'
 import ctx from '../util/context'
 import * as load from '../util/load'
 import results from './results'
+import build from '../util/build-functions'
 
 export default function runFunction (opts) {
   require('dotenv').config()
@@ -16,7 +17,6 @@ export default function runFunction (opts) {
     const env = opts.environment || 'development'
     const performBuild = opts.build
     const lambdaConfig = await load.lambdaConfig(name)
-    // const events = await load.events(name, opts.event)
     const [ fileName, handler ] = lambdaConfig.Handler.split('.')
 
     performBuild ? await build(name, env) : require('babel-register')

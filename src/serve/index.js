@@ -10,8 +10,10 @@ import ctx from '../util/context'
 import build from '../util/build-functions'
 import runFunction from '../run/run-function'
 import list from '../list'
+import { getEventFromRequest, getMatchingEndpoint } from './helpers'
 
 export default async function serve(opts) {
+
   // get available endpoints
   const endpoints = await list(opts)
 
@@ -26,19 +28,25 @@ export default async function serve(opts) {
     }
   }
 
-  // create http server
-  const server = http.createServer((request, response) => {
+  // http listener
+  function listener(request, response) {
     request.originalUrl = request.url
     request.url = url.parse(request.url, true)
+
+    // Allow CORS
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    response.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    response.setHeader('Access-Control-Allow-Credentials', true);
 
     console.log(`\n${chalk.green('URL     :')} ${request.originalUrl}`);
 
     const endpoint = getMatchingEndpoint(request, endpoints)
-
     if (!endpoint) {
       if (!opts.quiet) {
         console.log(`${chalk.red('Matching endpoint not found')}`)
       }
+      response.writeHead(404)
       return response.end('Endpoint not found')
     }
 
@@ -48,94 +56,77 @@ export default async function serve(opts) {
       const events = [getEventFromRequest(request, endpoint)]
       runFunction(opts)(handler, events)
         .then(result => {
+          const funcResponse = result[0].response
+
           if (opts.verbose) {
-            console.log(`${chalk.green('Route   :')} something`)
+            console.log(`${chalk.green('Resource:')} ${endpoint.path}`)
             console.log(`${chalk.green('Function:')} ${result[0].funcName}`)
             console.log(`${chalk.green('Duration:')} ${result[0].end - result[0].start} ms`);
-            console.log(`${chalk.green('Response:')}`, result[0].response);
+            console.log(`${chalk.green('Response:')}`, funcResponse);
           }
-          response.end(JSON.stringify(result[0].response))
+
+          // validate response
+          if (!validateFunctionResponse(funcResponse)) {
+            response.writeHead(502)
+            return response.end('Bad Gateway')
+          }
+
+          // write status code
+          response.writeHead(funcResponse.statusCode || 200)
+
+          // write Headers
+          for (const header in funcResponse.headers) {
+            if (funcResponse.headers.hasOwnProperty(header)) {
+              response.setHeader(header, funcResponse.headers[header])
+            }
+          }
+
+          // write response
+          response.end(funcResponse.body)
         })
         .catch(error => {
           if (opts.verbose) {
-            console.log(`${chalk.green('Route   :')} something`)
+            console.log(`${chalk.green('Resource:')} ${endpoint.path}`)
             console.log(`${chalk.green('Function:')} ${handler}`)
           }
           console.log(error);
-          response.end(error)
+          response.writeHead(500)
+          response.end('InternalServerError')
         })
     })
-  })
+  }
 
+  const server = http.createServer(listener)
   server.listen(opts.port)
         .on('listening', () => {
           console.log(`Listening on ${opts.port}`)
         })
         .on('error', onError)
+
+  // if function execution Times out
+  // process.on('uncaughtException', () => {})
 }
 
-
-function getMatchingEndpoint(request, endpoints) {
-  for (var i = 0; i < endpoints.length; i++) {
-    if (endpoints[i].method.toUpperCase() === 'ANY' || endpoints[i].method.toUpperCase() === request.method) {
-      const match = matchEndpointPath(request.url.pathname, endpoints[i].path)
-      if (match.found) {
-        return Object.assign({}, endpoints[i], { pathParams: match.pathParams })
-      }
-    }
-  }
-  // match NotFound
-  return null;
-}
-
-function matchEndpointPath(url, endpointPath) {
-  const urlSegments = url.split('/').slice(1)
-  const endpointSegments = endpointPath.split('/').slice(1)
-
-  if (urlSegments.length !== endpointSegments.length){
-    return { found: false, pathParams: null }
+function validateFunctionResponse(funcResponse) {
+  // statusCode: httpStatusCode
+  if (funcResponse.statusCode && typeof funcResponse.statusCode !== 'number') {
+    console.log(`${chalk.red('Function Response Error:')} statusCode must be a valid http status code`)
+    return false
   }
 
-  let pathParams = null
-
-  // resourceSegments, urlSegments - lengths are same
-  for (let i = 0; i < endpointSegments.length; i++) {
-    // if path param, capture its value
-    if (endpointSegments[i][0] === '{' && urlSegments[i]) {
-      pathParams = Object.assign({}, pathParams, {
-        [endpointSegments[i].slice(1,-1)]: urlSegments[i]
-      })
-    } else if (endpointSegments[i] !== urlSegments[i]) {
-      return {
-        found: false,
-        pathParams: null
-      }
-    }
+  // headers: {} or null
+  if (funcResponse.headers && typeof funcResponse.headers !== 'object') {
+    console.log(`${chalk.red('Function Response Error:')} headers must be a valid object`)
+    return false
   }
 
-  return {
-    found: true,
-    pathParams: pathParams
-  };
-}
-
-function getEventFromRequest(request, endpoint) {
-  // url.query will be {} when no params given, but aws expects it as null
-  const queryParams = Object.keys(request.url.query).length ? request.url.query : null
-  
-  return {
-    name: 'http-request',
-    data: {
-      resource: endpoint.path,
-      path: request.url.pathname,
-      httpMethod: request.method,
-      headers: request.headers,
-      queryStringParameters: queryParams , // {} or null
-      pathParameters: endpoint.pathParams, // {} or null
-      stageVariables: {},
-      body: request.body // data or null
-    }
+  // body: string
+  if (typeof funcResponse.body !== 'string') {
+    console.log(`${chalk.red('Function Response Error:')} body must be a string`)
+    return false
   }
+
+  return true
 }
 
 function getContentType(request) {

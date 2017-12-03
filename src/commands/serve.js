@@ -7,6 +7,8 @@ export function builder (yargs) {
   .describe('quiet', 'Don\'t log anything')
   .default('quiet', false)
   .alias('q', 'quiet')
+  .describe('build', 'Build functions before running. If omitted functions are transpiled by babel on the fly')
+  .default('build', false)
   .describe('verbose', 'Show detailed logs')
   .default('verbose', false)
   .describe('port', 'Start local server on the given port')

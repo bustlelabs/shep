@@ -1,7 +1,8 @@
 import path from 'path'
+import requireUncached from 'require-uncached'
 
 export default function (relativePath) {
-  return require(projectPath(relativePath))
+  return requireUncached(projectPath(relativePath))
 }
 
 function projectPath (relativePath) {
