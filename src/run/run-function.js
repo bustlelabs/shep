@@ -16,13 +16,15 @@ export default function runFunction (opts) {
 
     const env = opts.environment || 'development'
     const performBuild = opts.build
+    const runDist = opts.runDist
     const lambdaConfig = await load.lambdaConfig(name)
     const [ fileName, handler ] = lambdaConfig.Handler.split('.')
-
-    performBuild ? await build(name, env) : require('babel-register')
-
     const funcName = path.join(name, `${fileName}.js`)
-    const funcPath = performBuild ? (await load.distPath(funcName)) : path.join('functions', funcName)
+
+    if (!runDist) {
+      performBuild ? await build(name, env, { quiet: opts.quiet }) : require('babel-register')
+    }
+    const funcPath = (runDist || performBuild) ? (await load.distPath(funcName)) : path.join('functions', funcName)
 
     const func = requireProject(funcPath)[handler]
 

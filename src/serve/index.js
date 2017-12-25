@@ -3,11 +3,21 @@ import url from 'url'
 import querystring from 'querystring'
 import chalk from 'chalk'
 import * as load from '../util/load'
+import build from '../util/build-functions'
 import runFunction from '../run/run-function'
 import list from '../list'
 import { getEventFromRequest, getMatchingEndpoint } from './helpers'
 
 export default async function serve (opts) {
+  // build
+  opts.runDist = true
+  const env = opts.environment || 'development'
+  build('*', env, {
+    watch: true,
+    progress: true,
+    quiet: false,
+  })
+
   // get available endpoints
   const endpoints = await list(opts)
 
