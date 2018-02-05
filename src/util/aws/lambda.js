@@ -1,6 +1,7 @@
 import AWS from './'
 import loadRegion from './region-loader'
 import merge from 'lodash.merge'
+import pick from 'lodash.pick'
 import isEqual from 'lodash.isequal'
 import got from 'got'
 import { AWSEnvironmentVariableNotFound } from '../errors'
@@ -144,20 +145,13 @@ export async function updateFunction (oldFunction, wantedFunction) {
 }
 
 function isConfigEqual (a, b) {
-  const c = merge({}, a)
-  delete c['Version']
-  delete c['LastModified']
-  delete c['FunctionArn']
-  delete c['VpcConfig']
-  const d = merge({}, b)
-  delete d['Version']
-  delete d['LastModified']
-  delete d['FunctionArn']
-  delete d['VpcConfig']
-  debug('c', c)
-  debug('d', d)
+  const fields = [
+    'FunctionName',
+    'CodeSha256',
+    'Environment'
+  ]
 
-  return isEqual(c, d)
+  return isEqual(pick(a, fields), pick(b, fields))
 }
 
 // should beef this up
