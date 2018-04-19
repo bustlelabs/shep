@@ -28,7 +28,7 @@
     "lambda framework"
   ],
   "author": "Steve Faulkner <steve@bustle.com>",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/bustlelabs/shep"
