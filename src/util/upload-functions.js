@@ -6,7 +6,7 @@ import zipDir from './zip-dir'
 
 export default async function (fns, env) {
   return Promise.map(fns, async ({ name, key, bucket }) => {
-    const config = await lambdaConfig(name)
+    const config = await lambdaConfig(name, env)
     let wantedFunc = { Config: config, Code: {}, Identifier: {} }
 
     if (bucket && key) {

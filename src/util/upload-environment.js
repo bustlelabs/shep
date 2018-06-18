@@ -6,7 +6,7 @@ import { lambdaConfig, funcs } from './load'
 const pattern = '*'
 
 export default async function (env, vars) {
-  const configs = await Promise.map(funcs(pattern), async (name) => { return { name, config: await lambdaConfig(name) } })
+  const configs = await Promise.map(funcs(pattern), async (name) => { return { name, config: await lambdaConfig(name, env) } })
   return Promise.map(configs, async ({name, config}) => {
     const aliasExists = await doesAliasExist({ FunctionName: config.FunctionName, Alias: env })
     const oldFunc = await getFunction({ FunctionName: config.FunctionName, Qualifier: (aliasExists ? env : undefined) })

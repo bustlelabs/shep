@@ -5,7 +5,7 @@ import getLogs from '../util/get-logs'
 import { lambdaConfig } from '../util/load'
 
 export default async function ({ name, env, time = Infinity, logger = () => {} }) {
-  const { FunctionName } = await lambdaConfig(name)
+  const { FunctionName } = await lambdaConfig(name, env)
   const aliasName = env
 
   const [logGroupName, functionVersion] = await Promise.all([getLogGroup({ FunctionName }), getAliasVersion({ functionName: FunctionName, aliasName })])

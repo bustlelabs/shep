@@ -3,6 +3,7 @@ import td from '../helpers/testdouble'
 import path from 'path'
 
 const funcName = 'foo'
+const env = 'development'
 const handler = 'handler'
 const config = { Handler: `index.${handler}` }
 const events = ['event']
@@ -12,7 +13,7 @@ td.when(lambdaFunc[handler](td.matchers.anything(), td.matchers.isA(Object))).th
 const load = td.replace('../../src/util/load')
 load.distPath = async (joinPath) => joinPath ? path.join('dist', joinPath) : 'dist'
 td.when(load.funcs(funcName)).thenResolve([funcName])
-td.when(load.lambdaConfig(funcName)).thenResolve(config)
+td.when(load.lambdaConfig(funcName, env)).thenResolve(config)
 td.when(load.events(funcName, td.matchers.anything())).thenResolve(events)
 
 const build = td.replace('../../src/util/build-functions')

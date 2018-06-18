@@ -41,7 +41,7 @@ function runFunction (opts) {
   return async (name) => {
     const env = opts.environment || 'development'
     const performBuild = opts.build
-    const lambdaConfig = await load.lambdaConfig(name)
+    const lambdaConfig = await load.lambdaConfig(name, env)
     const events = await load.events(name, opts.event)
     const [ fileName, handler ] = lambdaConfig.Handler.split('.')
 
