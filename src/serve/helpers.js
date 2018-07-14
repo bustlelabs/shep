@@ -1,4 +1,14 @@
 export function getMatchingEndpoint (request, endpoints) {
+  // sort routes
+  // for (var i = 0; i < endpoints.length; i++) {
+  //   endpoints[i].path
+  // }
+  //
+  // endpoints = endpoints.sort((a, b) => {
+  //   return a.path.indexOf('+') > b.path.indexOf('+') ||
+  //          a.path.indexOf('{') > b.path.indexOf('{')
+  // })
+
   for (var i = 0; i < endpoints.length; i++) {
     if (endpoints[i].method.toUpperCase() === 'ANY' || endpoints[i].method.toUpperCase() === request.method) {
       const match = matchEndpointPath(request.url.pathname, endpoints[i].path)
@@ -25,8 +35,17 @@ export function matchEndpointPath (url, endpointPath) {
   for (let i = 0; i < endpointSegments.length; i++) {
     // if path param, capture its value
     if (endpointSegments[i][0] === '{' && urlSegments[i]) {
+      const param = endpointSegments[i].slice(1, -1)
+      const paramValue = null
+
+      if (param.slice(-1) === '+') {
+        paramValue = urlSegments[i].split('/')
+        param = param.slice(-1)
+      } else {
+        paramValue = urlSegments[i]
+      }
       pathParams = Object.assign({}, pathParams, {
-        [endpointSegments[i].slice(1, -1)]: urlSegments[i]
+        [param]: paramValue
       })
     } else if (endpointSegments[i] !== urlSegments[i]) {
       return {
@@ -42,7 +61,7 @@ export function matchEndpointPath (url, endpointPath) {
   }
 }
 
-export function getEventFromRequest (request, endpoint) {
+export function getEventFromRequest (request, { endpoint, env }) {
   // url.query will be {} when no params given, but aws expects it as null
   const queryParams = Object.keys(request.url.query).length ? request.url.query : null
 
@@ -55,7 +74,7 @@ export function getEventFromRequest (request, endpoint) {
       headers: request.headers,
       queryStringParameters: queryParams, // {} or null
       pathParameters: endpoint.pathParams, // {} or null
-      stageVariables: {},
+      stageVariables: { functionAlias: env || 'development' },
       body: request.body // data or null
     }
   }

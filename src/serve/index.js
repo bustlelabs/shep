@@ -10,13 +10,15 @@ import { getEventFromRequest, getMatchingEndpoint } from './helpers'
 
 export default async function serve (opts) {
   // build
-  opts.runDist = true
-  const env = opts.environment || 'development'
-  build('*', env, {
-    watch: true,
-    progress: true,
-    quiet: false,
-  })
+  opts.runDist = opts.build
+
+  if (opts.build) {
+    build('*', opts.env, {
+      watch: true,
+      progress: true,
+      quiet: false,
+    })
+  }
 
   // get available endpoints
   const endpoints = await list(opts)
@@ -57,7 +59,7 @@ export default async function serve (opts) {
     const handler = lambdaFunctions[endpoint.handler].name
 
     onData(request, () => {
-      const events = [getEventFromRequest(request, endpoint)]
+      const events = [getEventFromRequest(request, { endpoint, env: opts.env })]
       runFunction(opts)(handler, events)
         .then(result => {
           const funcResponse = result[0].response
@@ -75,9 +77,6 @@ export default async function serve (opts) {
             return response.end('Bad Gateway')
           }
 
-          // write status code
-          response.writeHead(funcResponse.statusCode || 200)
-
           // write Headers
           for (const header in funcResponse.headers) {
             if (funcResponse.headers.hasOwnProperty(header)) {
@@ -85,8 +84,11 @@ export default async function serve (opts) {
             }
           }
 
+          // write status code
+          response.writeHead(funcResponse.statusCode || 200)
+
           // write response
-          response.end(funcResponse.body)
+          response.end(funcResponse.body || '')
         })
         .catch(error => {
           if (opts.verbose) {
@@ -125,7 +127,7 @@ function validateFunctionResponse (funcResponse) {
   }
 
   // body: string
-  if (typeof funcResponse.body !== 'string') {
+  if (funcResponse.body && typeof funcResponse.body !== 'string') {
     console.log(`${chalk.red('Function Response Error:')} body must be a string`)
     return false
   }
@@ -151,10 +153,10 @@ function onData (request, onComplete) {
     try {
       switch (getContentType(request)) {
         case 'application/json':
-          request.body = JSON.parse(body)
+          request.body = JSON.parse(body || '')
           break
         case 'application/x-www-form-urlencoded':
-          request.body = querystring.parse(body)
+          request.body = querystring.parse(body || '')
           break
         default:
           request.body = null

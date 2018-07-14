@@ -292,6 +292,7 @@ Options:
   --help       Show help                                                                                       [boolean]
   --build      Build functions before running. If omitted functions are transpiled by babel on the fly  [default: false]
   --verbose    Show detailed logs                                                                       [default: false]
+  --env        Environment value                                                                [default: "development"]
   --port       Start local server on the given port                                                      [default: 3000]
   -q, --quiet  Don't log anything                                                                       [default: false]
 

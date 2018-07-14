@@ -11,6 +11,8 @@ export function builder (yargs) {
   .default('build', false)
   .describe('verbose', 'Show detailed logs')
   .default('verbose', false)
+  .describe('env', 'Environment value')
+  .default('env', 'development')
   .describe('port', 'Start local server on the given port')
   .default('port', 3000)
   .example('shep serve', 'Starts local server default port 3000')
