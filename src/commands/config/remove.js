@@ -4,7 +4,7 @@ import * as load from '../../util/load'
 import reporter from '../../util/reporter'
 import merge from 'lodash.merge'
 
-export const command = 'remove <vars...>'
+export const command = 'remove [--env=<env>] <VARS=values...>'
 export const desc = 'Remove environment variables for alias on AWS'
 export function builder (yargs) {
   return yargs

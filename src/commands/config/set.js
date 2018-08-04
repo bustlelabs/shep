@@ -4,7 +4,7 @@ import configSet from '../../config-set'
 import * as load from '../../util/load'
 import merge from 'lodash.merge'
 
-export const command = 'set <vars...>'
+export const command = 'set [--env=<env>] <VARS=values...>'
 export const desc = 'Set environment variables for alias on AWS'
 export function builder (yargs) {
   return yargs
