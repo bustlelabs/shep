@@ -35,8 +35,8 @@ export function matchEndpointPath (url, endpointPath) {
   for (let i = 0; i < endpointSegments.length; i++) {
     // if path param, capture its value
     if (endpointSegments[i][0] === '{' && urlSegments[i]) {
-      const param = endpointSegments[i].slice(1, -1)
-      const paramValue = null
+      let param = endpointSegments[i].slice(1, -1)
+      let paramValue = null
 
       if (param.slice(-1) === '+') {
         paramValue = urlSegments[i].split('/')
