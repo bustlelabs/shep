@@ -7,7 +7,7 @@ import setPermissions from '../util/set-permissions'
 import * as load from '../util/load'
 import push from '../util/push-api'
 
-export default async function ({ apiId, api: deployApi = true, functions = '*', env = 'development', region, bucket, build = true, logger = () => {} }) {
+export default async function ({ apiId, api: deployApi = true, functions = '*', env = 'development', region, bucket, build = true, logger = () => {}, quiet }) {
   const api = await load.api()
 
   let uploadFuncs, aliases
@@ -15,7 +15,7 @@ export default async function ({ apiId, api: deployApi = true, functions = '*', 
   try {
     if (build) {
       logger({ type: 'start', body: `Build Functions` })
-      await buildFuncs(functions, env)
+      await buildFuncs(functions, env, { quiet })
     } else {
       logger({ type: 'skip', body: 'Called with --no-build' })
     }

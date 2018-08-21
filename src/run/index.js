@@ -1,15 +1,11 @@
-import path from 'path'
-import requireProject from '../util/require-project'
 import * as load from '../util/load'
-import build from '../util/build-functions'
 import Promise from 'bluebird'
 import chalk from 'chalk'
-import ctx from '../util/context'
 import cliui from 'cliui'
+import runFunction from './run-function'
+import results from './results'
 
 const ui = cliui({ width: 80 })
-
-const results = { success: 'SUCCESS', error: 'ERROR', exception: 'EXCEPTION' }
 
 const awsNodeVersion = ['4.3.2', '6.10.2']
 
@@ -34,57 +30,6 @@ export default async function (opts) {
   }, 0)
 
   return { output, numberOfFailed }
-}
-
-function runFunction (opts) {
-  require('dotenv').config()
-  return async (name) => {
-    const env = opts.environment || 'development'
-    const performBuild = opts.build
-    const lambdaConfig = await load.lambdaConfig(name)
-    const events = await load.events(name, opts.event)
-    const [ fileName, handler ] = lambdaConfig.Handler.split('.')
-
-    performBuild ? await build(name, env) : require('babel-register')
-
-    const funcName = path.join(name, `${fileName}.js`)
-    const funcPath = performBuild ? (await load.distPath(funcName)) : path.join('functions', funcName)
-
-    const func = requireProject(funcPath)[handler]
-
-    if (typeof func !== 'function') {
-      throw new Error(`Handler function provided is not a function. Please verify that there exists a handler function exported as "${handler}" in "${funcPath}"`)
-    }
-
-    return Promise.map(events, (eventFilename) => {
-      if (typeof eventFilename !== 'string') { throw new Error('"eventFilename" must be a string') }
-      const event = requireProject(path.join(`functions`, name, 'events', eventFilename))
-      return new Promise((resolve) => {
-        const { context, callbackWrapper } = ctx(lambdaConfig)
-        const output = { name: eventFilename, funcName: name }
-        output.start = new Date()
-        try {
-          func(event, context, callbackWrapper((err, res) => {
-            output.end = new Date()
-            if (err) {
-              output.result = results.error
-              output.response = err
-            } else {
-              output.result = results.success
-              output.response = res
-            }
-            resolve(output)
-          }))
-        } catch (e) {
-          output.error = true
-          output.end = new Date()
-          output.result = results.exception
-          output.response = e
-          resolve(output)
-        }
-      })
-    })
-  }
 }
 
 function logFunction (shouldTruncate) {
